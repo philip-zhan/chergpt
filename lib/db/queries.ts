@@ -30,7 +30,7 @@ import {
   type User,
   user,
   vote,
-} from "./schema";
+} from "./schemas";
 import { generateHashedPassword } from "./utils";
 
 // Optionally, if not using email/pass login, you can
