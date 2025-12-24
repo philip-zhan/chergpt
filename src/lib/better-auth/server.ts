@@ -19,25 +19,20 @@ export const auth = betterAuth({
   plugins: [admin(), apiKey(), organization()],
 });
 
-export async function getOrganizationId() {
-  const session = await getSession();
-  const organizationId = session?.activeOrganizationId;
-  return organizationId;
-}
-
-export async function getSession() {
+async function _getSession() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     throw new Error("No session found");
   }
+  return session;
+}
+
+export async function getSession() {
+  const session = await _getSession();
   return session.session;
 }
 
-export async function getUserId() {
-  const session = await getSession();
-  const userId = session?.userId;
-  if (!userId) {
-    throw new Error("No user ID found");
-  }
-  return userId;
+export async function getUser() {
+  const session = await _getSession();
+  return session.user;
 }
