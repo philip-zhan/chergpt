@@ -10,7 +10,9 @@ export const auth = betterAuth({
   }),
   socialProviders: {
     google: {
+      // biome-ignore lint: Forbidden non-null assertion.
       clientId: process.env.GOOGLE_CLIENT_ID!,
+      // biome-ignore lint: Forbidden non-null assertion.
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
