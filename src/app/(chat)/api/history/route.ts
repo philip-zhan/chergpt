@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { deleteAllChatsByUserId, getChatsByUserId } from "@/db/queries/chat";
-import { getSession } from "@/lib/better-auth/server";
+import { getSession } from "@/lib/auth";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {

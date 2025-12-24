@@ -6,7 +6,7 @@ import { DataStreamHandler } from "@/components/data-stream-handler";
 import { getChatById } from "@/db/queries/chat";
 import { getMessagesByChatId } from "@/db/queries/message";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { getSession } from "@/lib/better-auth/server";
+import { getSession } from "@/lib/auth";
 import { convertToUIMessages } from "@/lib/utils";
 
 export default function Page(props: { params: Promise<{ id: string }> }) {

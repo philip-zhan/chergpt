@@ -1,5 +1,5 @@
 import { getSuggestionsByDocumentId } from "@/db/queries/suggestion";
-import { getSession } from "@/lib/better-auth/server";
+import { getSession } from "@/lib/auth";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {

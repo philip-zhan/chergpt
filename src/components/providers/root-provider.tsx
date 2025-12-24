@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
-import { authClient } from "@/lib/better-auth/client";
+import { authClient } from "@/lib/auth/client";
 
 export function RootProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
