@@ -68,7 +68,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 
 // ============================================================================
 // Provider Context & Types
