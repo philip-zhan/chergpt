@@ -1,9 +1,9 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
+import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { type Suggestion, suggestion } from "../schemas/suggestion";
-import { db } from "./db";
 
 export async function saveSuggestions({
   suggestions,

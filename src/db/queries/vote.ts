@@ -1,9 +1,9 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
+import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { vote } from "../schemas/vote";
-import { db } from "./db";
 
 export async function voteMessage({
   chatId,

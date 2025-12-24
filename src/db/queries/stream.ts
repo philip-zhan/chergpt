@@ -1,9 +1,9 @@
 import "server-only";
 
 import { asc, eq } from "drizzle-orm";
+import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { stream } from "../schemas/stream";
-import { db } from "./db";
 
 export async function createStreamId({
   streamId,

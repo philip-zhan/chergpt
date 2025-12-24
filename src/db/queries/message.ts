@@ -1,11 +1,11 @@
 import "server-only";
 
 import { and, asc, count, eq, gte, inArray } from "drizzle-orm";
+import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { chat } from "../schemas/chat";
 import { type DBMessage, message } from "../schemas/message";
 import { vote } from "../schemas/vote";
-import { db } from "./db";
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   try {

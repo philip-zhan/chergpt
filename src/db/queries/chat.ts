@@ -2,12 +2,12 @@ import "server-only";
 
 import { and, desc, eq, gt, inArray, lt, type SQL } from "drizzle-orm";
 import type { VisibilityType } from "@/components/visibility-selector";
+import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { type Chat, chat } from "../schemas/chat";
 import { message } from "../schemas/message";
 import { stream } from "../schemas/stream";
 import { vote } from "../schemas/vote";
-import { db } from "./db";
 
 export async function saveChat({
   id,
