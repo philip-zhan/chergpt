@@ -8,8 +8,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth";
 import { document } from "./document";
-import { user } from "./user";
 
 export const suggestion = pgTable(
   "suggestion",

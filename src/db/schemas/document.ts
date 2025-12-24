@@ -7,7 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { user } from "./user";
+import { user } from "./auth";
 
 export const document = pgTable(
   "document",

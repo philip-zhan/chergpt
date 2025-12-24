@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
 import { generateUUID } from "@/lib/utils";
-import { type User, user } from "../schemas/user";
+import { user } from "../schemas/auth";
 import { generateHashedPassword } from "../utils";
 
-export async function getUser(email: string): Promise<User[]> {
+export async function getUser(email: string) {
   try {
     return await db.select().from(user).where(eq(user.email, email));
   } catch (_error) {
