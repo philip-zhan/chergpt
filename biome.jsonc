@@ -4,9 +4,9 @@
   "files": {
     "includes": [
       "**/*",
-      "!components/ui",
-      "!lib/utils.ts",
-      "!hooks/use-mobile.ts"
+      "!src/components/ui",
+      "!src/lib/utils.ts",
+      "!src/hooks/use-mobile.ts"
     ]
   },
   "linter": {
