@@ -3,11 +3,11 @@
 import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
+import { updateChatVisibilityById } from "@/db/queries/chat";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
-  updateChatVisibilityById,
-} from "@/db/queries";
+} from "@/db/queries/message";
 import { titlePrompt } from "@/lib/ai/prompts";
 import { getTitleModel } from "@/lib/ai/providers";
 import { getTextFromMessage } from "@/lib/utils";

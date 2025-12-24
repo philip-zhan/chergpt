@@ -14,17 +14,19 @@ import {
 } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import {
-  createStreamId,
   deleteChatById,
   getChatById,
+  saveChat,
+  updateChatTitleById,
+} from "@/db/queries/chat";
+import {
   getMessageCountByUserId,
   getMessagesByChatId,
-  saveChat,
   saveMessages,
-  updateChatTitleById,
   updateMessage,
-} from "@/db/queries";
-import type { DBMessage } from "@/db/schema";
+} from "@/db/queries/message";
+import { createStreamId } from "@/db/queries/stream";
+import type { DBMessage } from "@/db/schemas/message";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";

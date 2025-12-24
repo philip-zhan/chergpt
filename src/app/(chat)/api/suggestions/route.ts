@@ -1,5 +1,5 @@
 import { auth } from "@/app/(auth)/auth";
-import { getSuggestionsByDocumentId } from "@/db/queries";
+import { getSuggestionsByDocumentId } from "@/db/queries/suggestion";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {

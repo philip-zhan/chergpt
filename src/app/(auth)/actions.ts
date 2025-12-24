@@ -1,8 +1,7 @@
 "use server";
 
 import { z } from "zod";
-
-import { createUser, getUser } from "@/db/queries";
+import { createUser, getUser } from "@/db/queries/user";
 
 import { signIn } from "./auth";
 

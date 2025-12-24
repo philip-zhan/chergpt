@@ -2,7 +2,7 @@ import { compare } from "bcrypt-ts";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { createGuestUser, getUser } from "@/db/queries";
+import { createGuestUser, getUser } from "@/db/queries/user";
 import { DUMMY_PASSWORD } from "@/lib/constants";
 import { authConfig } from "./auth.config";
 
