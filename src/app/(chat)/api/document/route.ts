@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   if (documents.length > 0) {
     const [doc] = documents;
 
-    if (doc.userId !== session.user.id) {
+    if (doc.userId !== session.userId) {
       return new ChatSDKError("forbidden:document").toResponse();
     }
   }
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     content,
     title,
     kind,
-    userId: session.user.id,
+    userId: session.userId,
   });
 
   return Response.json(document, { status: 200 });
