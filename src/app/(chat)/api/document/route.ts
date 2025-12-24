@@ -1,10 +1,10 @@
-import { auth } from "@/app/(auth)/auth";
 import type { ArtifactKind } from "@/components/artifact";
 import {
   deleteDocumentsByIdAfterTimestamp,
   getDocumentsById,
   saveDocument,
 } from "@/db/queries/document";
+import { getSession } from "@/lib/better-auth/server";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {
@@ -18,9 +18,9 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:document").toResponse();
   }
 
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     return new ChatSDKError("not_found:document").toResponse();
   }
 
-  if (document.userId !== session.user.id) {
+  if (document.userId !== session.userId) {
     return new ChatSDKError("forbidden:document").toResponse();
   }
 
@@ -50,9 +50,9 @@ export async function POST(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("not_found:document").toResponse();
   }
 
@@ -103,9 +103,9 @@ export async function DELETE(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:document").toResponse();
   }
 
@@ -113,7 +113,7 @@ export async function DELETE(request: Request) {
 
   const [document] = documents;
 
-  if (document.userId !== session.user.id) {
+  if (document.userId !== session.userId) {
     return new ChatSDKError("forbidden:document").toResponse();
   }
 

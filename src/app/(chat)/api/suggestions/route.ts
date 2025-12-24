@@ -1,5 +1,5 @@
-import { auth } from "@/app/(auth)/auth";
 import { getSuggestionsByDocumentId } from "@/db/queries/suggestion";
+import { getSession } from "@/lib/better-auth/server";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {
@@ -13,9 +13,9 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:suggestions").toResponse();
   }
 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     return Response.json([], { status: 200 });
   }
 
-  if (suggestion.userId !== session.user.id) {
+  if (suggestion.userId !== session.userId) {
     return new ChatSDKError("forbidden:api").toResponse();
   }
 

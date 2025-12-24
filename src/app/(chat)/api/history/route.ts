@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
-import { auth } from "@/app/(auth)/auth";
 import { deleteAllChatsByUserId, getChatsByUserId } from "@/db/queries/chat";
+import { getSession } from "@/lib/better-auth/server";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
@@ -17,14 +17,14 @@ export async function GET(request: NextRequest) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
   const chats = await getChatsByUserId({
-    id: session.user.id,
+    id: session.userId,
     limit,
     startingAfter,
     endingBefore,
@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE() {
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
-  const result = await deleteAllChatsByUserId({ userId: session.user.id });
+  const result = await deleteAllChatsByUserId({ userId: session.userId });
 
   return Response.json(result, { status: 200 });
 }

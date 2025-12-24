@@ -1,6 +1,6 @@
-import { auth } from "@/app/(auth)/auth";
 import { getChatById } from "@/db/queries/chat";
 import { getVotesByChatId, voteMessage } from "@/db/queries/vote";
+import { getSession } from "@/lib/better-auth/server";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {
@@ -14,9 +14,9 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:vote").toResponse();
   }
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     return new ChatSDKError("not_found:chat").toResponse();
   }
 
-  if (chat.userId !== session.user.id) {
+  if (chat.userId !== session.userId) {
     return new ChatSDKError("forbidden:vote").toResponse();
   }
 
@@ -50,9 +50,9 @@ export async function PATCH(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:vote").toResponse();
   }
 
@@ -62,7 +62,7 @@ export async function PATCH(request: Request) {
     return new ChatSDKError("not_found:vote").toResponse();
   }
 
-  if (chat.userId !== session.user.id) {
+  if (chat.userId !== session.userId) {
     return new ChatSDKError("forbidden:vote").toResponse();
   }
 
