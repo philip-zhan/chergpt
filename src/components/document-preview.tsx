@@ -10,7 +10,7 @@ import {
   useRef,
 } from "react";
 import useSWR from "swr";
-import type { Document } from "@/db/schema";
+import type { Document } from "@/db/schemas/document";
 import { useArtifact } from "@/hooks/use-artifact";
 import { cn, fetcher } from "@/lib/utils";
 import type { ArtifactKind, UIArtifact } from "./artifact";

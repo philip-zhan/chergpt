@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { useWindowSize } from "usehooks-ts";
-import type { Document } from "@/db/schema";
+import type { Document } from "@/db/schemas/document";
 import { useArtifact } from "@/hooks/use-artifact";
 import { getDocumentTimestampByIndex } from "@/lib/utils";
 import { LoaderIcon } from "./icons";

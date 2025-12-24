@@ -6,7 +6,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { memo, useEffect, useRef } from "react";
-import type { Suggestion } from "@/db/schema";
+import type { Suggestion } from "@/db/schemas/suggestion";
 
 type EditorProps = {
   content: string;

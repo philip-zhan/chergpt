@@ -2,7 +2,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { ArrowDownIcon } from "lucide-react";
 import { memo } from "react";
-import type { Vote } from "@/db/schema";
+import type { Vote } from "@/db/schemas/vote";
 import { useMessages } from "@/hooks/use-messages";
 import type { ChatMessage } from "@/lib/types";
 import { useDataStream } from "./data-stream-provider";
