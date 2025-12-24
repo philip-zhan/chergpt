@@ -7,8 +7,8 @@ import type {
 import { type ClassValue, clsx } from "clsx";
 import { formatISO } from "date-fns";
 import { twMerge } from "tailwind-merge";
-import type { Document } from "@/lib/db/schemas/document";
-import type { DBMessage } from "@/lib/db/schemas/message";
+import type { Document } from "@/db/schemas/document";
+import type { DBMessage } from "@/db/schemas/message";
 import { ChatSDKError, type ErrorCode } from "./errors";
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from "./types";
 
