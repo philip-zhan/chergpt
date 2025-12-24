@@ -1,12 +1,12 @@
 import { createUIMessageStream, JsonToSseTransformStream } from "ai";
 import { differenceInSeconds } from "date-fns";
 import { auth } from "@/app/(auth)/auth";
-import type { Chat } from "@/db/schemas/chat";
 import {
   getChatById,
   getMessagesByChatId,
   getStreamIdsByChatId,
-} from "@/lib/db/queries";
+} from "@/db/queries";
+import type { Chat } from "@/db/schemas/chat";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import { getStreamContext } from "../../route";

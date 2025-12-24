@@ -13,14 +13,6 @@ import {
   type ResumableStreamContext,
 } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { getLanguageModel } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { getWeather } from "@/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
-import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
   deleteChatById,
@@ -31,8 +23,16 @@ import {
   saveMessages,
   updateChatTitleById,
   updateMessage,
-} from "@/lib/db/queries";
-import type { DBMessage } from "@/lib/db/schema";
+} from "@/db/queries";
+import type { DBMessage } from "@/db/schema";
+import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+import { getLanguageModel } from "@/lib/ai/providers";
+import { createDocument } from "@/lib/ai/tools/create-document";
+import { getWeather } from "@/lib/ai/tools/get-weather";
+import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { updateDocument } from "@/lib/ai/tools/update-document";
+import { isProductionEnvironment } from "@/lib/constants";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
