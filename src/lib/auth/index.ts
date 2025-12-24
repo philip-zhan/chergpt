@@ -3,10 +3,13 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin, apiKey, organization } from "better-auth/plugins";
 import { headers } from "next/headers";
 import { db } from "@/db";
+// biome-ignore lint: Namespace imports are not allowed.
+import * as schema from "@/db/schemas/auth";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema,
   }),
   emailAndPassword: {
     enabled: true,
@@ -23,6 +26,11 @@ export const auth = betterAuth({
     },
   },
   plugins: [admin(), apiKey(), organization()],
+  advanced: {
+    database: {
+      generateId: "serial",
+    },
+  },
 });
 
 async function _getSession() {

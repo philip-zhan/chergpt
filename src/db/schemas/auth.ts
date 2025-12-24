@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-  id: text("id").primaryKey(),
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -29,7 +29,7 @@ export const user = pgTable("user", {
 export const session = pgTable(
   "session",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -38,7 +38,7 @@ export const session = pgTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     impersonatedBy: text("impersonated_by"),
@@ -52,10 +52,10 @@ export const session = pgTable(
 export const account = pgTable(
   "account",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -78,7 +78,7 @@ export const account = pgTable(
 export const verification = pgTable(
   "verification",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -98,12 +98,12 @@ export const verification = pgTable(
 export const apikey = pgTable(
   "apikey",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
     name: text("name"),
     start: text("start"),
     prefix: text("prefix"),
     key: text("key").notNull(),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     refillInterval: integer("refill_interval"),
@@ -131,7 +131,7 @@ export const apikey = pgTable(
 export const organization = pgTable(
   "organization",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
     logo: text("logo"),
@@ -148,11 +148,11 @@ export const organization = pgTable(
 export const member = pgTable(
   "member",
   {
-    id: text("id").primaryKey(),
-    organizationId: text("organization_id")
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    organizationId: integer("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     role: text("role").default("member").notNull(),
@@ -169,8 +169,8 @@ export const member = pgTable(
 export const invitation = pgTable(
   "invitation",
   {
-    id: text("id").primaryKey(),
-    organizationId: text("organization_id")
+    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    organizationId: integer("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
     email: text("email").notNull(),
@@ -178,7 +178,7 @@ export const invitation = pgTable(
     status: text("status").default("pending").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    inviterId: text("inviter_id")
+    inviterId: integer("inviter_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },

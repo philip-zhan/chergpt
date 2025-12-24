@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "npx ultracite@latest check",
     "format": "npx ultracite@latest fix",
+    "auth:generate": "npx @better-auth/cli generate --output src/db/schemas/auth.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
