@@ -93,8 +93,8 @@ export const requestSuggestions = ({
         }
       }
 
-      if (session.user?.id) {
-        const userId = session.user.id;
+      if (session.userId) {
+        const userId = session.userId;
 
         await saveSuggestions({
           suggestions: suggestions.map((suggestion) => ({

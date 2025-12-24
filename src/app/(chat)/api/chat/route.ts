@@ -12,7 +12,6 @@ import {
   createResumableStreamContext,
   type ResumableStreamContext,
 } from "resumable-stream";
-import { auth, type UserType } from "@/app/(auth)/auth";
 import {
   deleteChatById,
   getChatById,
@@ -20,20 +19,19 @@ import {
   updateChatTitleById,
 } from "@/db/queries/chat";
 import {
-  getMessageCountByUserId,
   getMessagesByChatId,
   saveMessages,
   updateMessage,
 } from "@/db/queries/message";
 import { createStreamId } from "@/db/queries/stream";
 import type { DBMessage } from "@/db/schemas/message";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { getSession } from "@/lib/better-auth/server";
 import { isProductionEnvironment } from "@/lib/constants";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
@@ -79,21 +77,10 @@ export async function POST(request: Request) {
     const { id, message, messages, selectedChatModel, selectedVisibilityType } =
       requestBody;
 
-    const session = await auth();
+    const session = await getSession();
 
-    if (!session?.user) {
+    if (!session?.userId) {
       return new ChatSDKError("unauthorized:chat").toResponse();
-    }
-
-    const userType: UserType = session.user.type;
-
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
-      return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
     // Check if this is a tool approval flow (all messages sent)
@@ -104,18 +91,18 @@ export async function POST(request: Request) {
     let titlePromise: Promise<string> | null = null;
 
     if (chat) {
-      if (chat.userId !== session.user.id) {
+      if (chat.userId !== session.userId) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
-      // Only fetch messages if chat already exists and not tool approval
       if (!isToolApprovalFlow) {
+        // Only fetch messages if chat already exists and not tool approval
         messagesFromDb = await getMessagesByChatId({ id });
       }
     } else if (message?.role === "user") {
       // Save chat immediately with placeholder title
       await saveChat({
         id,
-        userId: session.user.id,
+        userId: session.userId,
         title: "New chat",
         visibility: selectedVisibilityType,
       });
@@ -313,15 +300,15 @@ export async function DELETE(request: Request) {
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session?.user) {
+  if (!session?.userId) {
     return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
   const chat = await getChatById({ id });
 
-  if (chat?.userId !== session.user.id) {
+  if (chat?.userId !== session.userId) {
     return new ChatSDKError("forbidden:chat").toResponse();
   }
 
