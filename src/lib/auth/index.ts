@@ -8,6 +8,12 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  emailAndPassword: {
+    enabled: true,
+    async sendResetPassword() {
+      // TODO: Send an email to the user with a link to reset their password
+    },
+  },
   socialProviders: {
     google: {
       // biome-ignore lint: Forbidden non-null assertion.

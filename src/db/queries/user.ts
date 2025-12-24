@@ -3,9 +3,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
-import { generateUUID } from "@/lib/utils";
 import { user } from "../schemas/auth";
-import { generateHashedPassword } from "../utils";
 
 export async function getUser(email: string) {
   try {
@@ -18,29 +16,29 @@ export async function getUser(email: string) {
   }
 }
 
-export async function createUser(email: string, password: string) {
-  const hashedPassword = generateHashedPassword(password);
+// export async function createUser(email: string, password: string) {
+//   const hashedPassword = generateHashedPassword(password);
 
-  try {
-    return await db.insert(user).values({ email, password: hashedPassword });
-  } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to create user");
-  }
-}
+//   try {
+//     return await db.insert(user).values({ email, password: hashedPassword });
+//   } catch (_error) {
+//     throw new ChatSDKError("bad_request:database", "Failed to create user");
+//   }
+// }
 
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
+// export async function createGuestUser() {
+//   const email = `guest-${Date.now()}`;
+//   const password = generateHashedPassword(generateUUID());
 
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
-  }
-}
+//   try {
+//     return await db.insert(user).values({ email, password }).returning({
+//       id: user.id,
+//       email: user.email,
+//     });
+//   } catch (_error) {
+//     throw new ChatSDKError(
+//       "bad_request:database",
+//       "Failed to create guest user"
+//     );
+//   }
+// }
