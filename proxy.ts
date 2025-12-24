@@ -1,6 +1,6 @@
+import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./src/lib/constants";
+import { auth } from "@/lib/better-auth/server";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,31 +13,19 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
-  if (pathname.startsWith("/api/auth")) {
-    return NextResponse.next();
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return redirectToLogin(request);
   }
-
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
-
-  if (!token) {
-    const redirectUrl = encodeURIComponent(request.url);
-
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
-    );
-  }
-
-  const isGuest = guestRegex.test(token?.email ?? "");
-
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   return NextResponse.next();
+}
+
+function redirectToLogin(request: NextRequest) {
+  const redirectTo = request.nextUrl.pathname + request.nextUrl.search;
+  return NextResponse.redirect(
+    new URL(`/auth/sign-in?redirectTo=${redirectTo}`, request.url)
+  );
 }
 
 export const config = {
