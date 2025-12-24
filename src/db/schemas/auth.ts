@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -29,7 +29,7 @@ export const user = pgTable("user", {
 export const session = pgTable(
   "session",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -52,7 +52,7 @@ export const session = pgTable(
 export const account = pgTable(
   "account",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: integer("user_id")
@@ -78,7 +78,7 @@ export const account = pgTable(
 export const verification = pgTable(
   "verification",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -98,7 +98,7 @@ export const verification = pgTable(
 export const apikey = pgTable(
   "apikey",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     name: text("name"),
     start: text("start"),
     prefix: text("prefix"),
@@ -131,7 +131,7 @@ export const apikey = pgTable(
 export const organization = pgTable(
   "organization",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
     logo: text("logo"),
@@ -148,7 +148,7 @@ export const organization = pgTable(
 export const member = pgTable(
   "member",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     organizationId: integer("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
@@ -169,7 +169,7 @@ export const member = pgTable(
 export const invitation = pgTable(
   "invitation",
   {
-    id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     organizationId: integer("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
