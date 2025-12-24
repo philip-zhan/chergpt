@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 
 const providers = {
   github: {

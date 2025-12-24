@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { useArtifactSelector } from "@/src/hooks/use-artifact";
-import { cn } from "@/src/lib/utils";
+import { useArtifactSelector } from "@/hooks/use-artifact";
+import { cn } from "@/lib/utils";
 import { Loader } from "./elements/loader";
 import { CrossSmallIcon, TerminalWindowIcon } from "./icons";
 import { Button } from "./ui/button";

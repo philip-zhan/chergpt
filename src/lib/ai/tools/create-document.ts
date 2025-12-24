@@ -4,9 +4,9 @@ import { z } from "zod";
 import {
   artifactKinds,
   documentHandlersByArtifactKind,
-} from "@/src/lib/artifacts/server";
-import type { ChatMessage } from "@/src/lib/types";
-import { generateUUID } from "@/src/lib/utils";
+} from "@/lib/artifacts/server";
+import type { ChatMessage } from "@/lib/types";
+import { generateUUID } from "@/lib/utils";
 
 type CreateDocumentProps = {
   session: Session;

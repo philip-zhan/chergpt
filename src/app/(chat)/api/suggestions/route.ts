@@ -1,6 +1,6 @@
-import { auth } from "@/src/app/(auth)/auth";
-import { getSuggestionsByDocumentId } from "@/src/lib/db/queries";
-import { ChatSDKError } from "@/src/lib/errors";
+import { auth } from "@/app/(auth)/auth";
+import { getSuggestionsByDocumentId } from "@/lib/db/queries";
+import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

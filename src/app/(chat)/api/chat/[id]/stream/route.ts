@@ -1,14 +1,14 @@
 import { createUIMessageStream, JsonToSseTransformStream } from "ai";
 import { differenceInSeconds } from "date-fns";
-import { auth } from "@/src/app/(auth)/auth";
+import { auth } from "@/app/(auth)/auth";
 import {
   getChatById,
   getMessagesByChatId,
   getStreamIdsByChatId,
-} from "@/src/lib/db/queries";
-import type { Chat } from "@/src/lib/db/schema";
-import { ChatSDKError } from "@/src/lib/errors";
-import type { ChatMessage } from "@/src/lib/types";
+} from "@/lib/db/queries";
+import type { Chat } from "@/lib/db/schema";
+import { ChatSDKError } from "@/lib/errors";
+import type { ChatMessage } from "@/lib/types";
 import { getStreamContext } from "../../route";
 
 export async function GET(

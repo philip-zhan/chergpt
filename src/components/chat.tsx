@@ -17,13 +17,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useArtifactSelector } from "@/src/hooks/use-artifact";
-import { useAutoResume } from "@/src/hooks/use-auto-resume";
-import { useChatVisibility } from "@/src/hooks/use-chat-visibility";
-import type { Vote } from "@/src/lib/db/schema";
-import { ChatSDKError } from "@/src/lib/errors";
-import type { Attachment, ChatMessage } from "@/src/lib/types";
-import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/src/lib/utils";
+import { useArtifactSelector } from "@/hooks/use-artifact";
+import { useAutoResume } from "@/hooks/use-auto-resume";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import type { Vote } from "@/lib/db/schema";
+import { ChatSDKError } from "@/lib/errors";
+import type { Attachment, ChatMessage } from "@/lib/types";
+import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";

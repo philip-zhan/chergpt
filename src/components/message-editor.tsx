@@ -9,9 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { deleteTrailingMessages } from "@/src/app/(chat)/actions";
-import type { ChatMessage } from "@/src/lib/types";
-import { getTextFromMessage } from "@/src/lib/utils";
+import { deleteTrailingMessages } from "@/app/(chat)/actions";
+import type { ChatMessage } from "@/lib/types";
+import { getTextFromMessage } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 

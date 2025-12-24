@@ -14,7 +14,7 @@ import {
   RedoIcon,
   UndoIcon,
 } from "@/components/icons";
-import { generateUUID } from "@/src/lib/utils";
+import { generateUUID } from "@/lib/utils";
 
 const OUTPUT_HANDLERS = {
   matplotlib: `

@@ -3,14 +3,14 @@
 import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { titlePrompt } from "@/src/lib/ai/prompts";
-import { getTitleModel } from "@/src/lib/ai/providers";
+import { titlePrompt } from "@/lib/ai/prompts";
+import { getTitleModel } from "@/lib/ai/providers";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
   updateChatVisibilityById,
-} from "@/src/lib/db/queries";
-import { getTextFromMessage } from "@/src/lib/utils";
+} from "@/lib/db/queries";
+import { getTextFromMessage } from "@/lib/utils";
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();

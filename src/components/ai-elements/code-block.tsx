@@ -12,7 +12,7 @@ import {
 } from "react";
 import { type BundledLanguage, codeToHtml, type ShikiTransformer } from "shiki";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 
 type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   code: string;

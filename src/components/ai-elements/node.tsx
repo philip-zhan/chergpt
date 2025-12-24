@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type NodeProps = ComponentProps<typeof Card> & {
   handles: {

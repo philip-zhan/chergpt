@@ -2,9 +2,9 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { memo, useState } from "react";
-import type { Vote } from "@/src/lib/db/schema";
-import type { ChatMessage } from "@/src/lib/types";
-import { cn, sanitizeText } from "@/src/lib/utils";
+import type { Vote } from "@/lib/db/schema";
+import type { ChatMessage } from "@/lib/types";
+import { cn, sanitizeText } from "@/lib/utils";
 import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
 import { DocumentPreview } from "./document-preview";

@@ -9,7 +9,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type QueueMessagePart = {
   type: string;

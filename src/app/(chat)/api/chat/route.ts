@@ -12,15 +12,15 @@ import {
   createResumableStreamContext,
   type ResumableStreamContext,
 } from "resumable-stream";
-import { auth, type UserType } from "@/src/app/(auth)/auth";
-import { entitlementsByUserType } from "@/src/lib/ai/entitlements";
-import { type RequestHints, systemPrompt } from "@/src/lib/ai/prompts";
-import { getLanguageModel } from "@/src/lib/ai/providers";
-import { createDocument } from "@/src/lib/ai/tools/create-document";
-import { getWeather } from "@/src/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/src/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/src/lib/ai/tools/update-document";
-import { isProductionEnvironment } from "@/src/lib/constants";
+import { auth, type UserType } from "@/app/(auth)/auth";
+import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+import { getLanguageModel } from "@/lib/ai/providers";
+import { createDocument } from "@/lib/ai/tools/create-document";
+import { getWeather } from "@/lib/ai/tools/get-weather";
+import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { updateDocument } from "@/lib/ai/tools/update-document";
+import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
   deleteChatById,
@@ -31,11 +31,11 @@ import {
   saveMessages,
   updateChatTitleById,
   updateMessage,
-} from "@/src/lib/db/queries";
-import type { DBMessage } from "@/src/lib/db/schema";
-import { ChatSDKError } from "@/src/lib/errors";
-import type { ChatMessage } from "@/src/lib/types";
-import { convertToUIMessages, generateUUID } from "@/src/lib/utils";
+} from "@/lib/db/queries";
+import type { DBMessage } from "@/lib/db/schema";
+import { ChatSDKError } from "@/lib/errors";
+import type { ChatMessage } from "@/lib/types";
+import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 

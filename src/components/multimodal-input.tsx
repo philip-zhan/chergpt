@@ -31,9 +31,9 @@ import {
   chatModels,
   DEFAULT_CHAT_MODEL,
   modelsByProvider,
-} from "@/src/lib/ai/models";
-import type { Attachment, ChatMessage } from "@/src/lib/types";
-import { cn } from "@/src/lib/utils";
+} from "@/lib/ai/models";
+import type { Attachment, ChatMessage } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   PromptInput,
   PromptInputSubmit,

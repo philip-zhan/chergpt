@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { toast } from "sonner";
-import { useArtifact } from "@/src/hooks/use-artifact";
+import { useArtifact } from "@/hooks/use-artifact";
 import type { ArtifactKind } from "./artifact";
 import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from "./icons";
 

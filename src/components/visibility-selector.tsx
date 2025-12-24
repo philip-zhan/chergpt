@@ -8,8 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useChatVisibility } from "@/src/hooks/use-chat-visibility";
-import { cn } from "@/src/lib/utils";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { cn } from "@/lib/utils";
 import {
   CheckCircleFillIcon,
   ChevronDownIcon,
