@@ -40,17 +40,17 @@ export function RootProvider({ children }: { children: ReactNode }) {
         onSessionChange={() => {
           router.refresh();
         }}
-        organization={{
-          logo: {
-            // upload: avatarUploader,
-          },
-          basePath: "/dashboard/organization",
-          viewPaths: {
-            SETTINGS: "#settings",
-            MEMBERS: "#members",
-            API_KEYS: "#api-keys",
-          },
-        }}
+        // organization={{
+        //   logo: {
+        //     // upload: avatarUploader,
+        //   },
+        //   basePath: "/dashboard/organization",
+        //   viewPaths: {
+        //     SETTINGS: "#settings",
+        //     MEMBERS: "#members",
+        //     API_KEYS: "#api-keys",
+        //   },
+        // }}
         replace={router.replace}
         social={{
           providers: ["google"],
