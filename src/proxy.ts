@@ -15,7 +15,7 @@ export async function proxy(request: NextRequest) {
 
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session) {
+  if (!session && !pathname.startsWith("/auth")) {
     return redirectToLogin(request);
   }
   return NextResponse.next();
@@ -33,8 +33,6 @@ export const config = {
     "/",
     "/chat/:id",
     "/api/:path*",
-    "/login",
-    "/register",
 
     /*
      * Match all request paths except for the ones starting with:
