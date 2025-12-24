@@ -14,4 +14,3 @@ export const message = pgTable("message", {
 });
 
 export type DBMessage = InferSelectModel<typeof message>;
-

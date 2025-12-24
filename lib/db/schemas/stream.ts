@@ -25,4 +25,3 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
-
