@@ -99,7 +99,7 @@ export async function getMessageCountByUserId({
   id,
   differenceInHours,
 }: {
-  id: string;
+  id: number;
   differenceInHours: number;
 }) {
   try {

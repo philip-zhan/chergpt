@@ -18,7 +18,7 @@ export async function saveDocument({
   title: string;
   kind: ArtifactKind;
   content: string;
-  userId: string;
+  userId: number;
 }) {
   try {
     return await db

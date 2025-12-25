@@ -16,7 +16,7 @@ export async function saveChat({
   visibility,
 }: {
   id: string;
-  userId: string;
+  userId: number;
   title: string;
   visibility: VisibilityType;
 }) {
@@ -52,7 +52,7 @@ export async function deleteChatById({ id }: { id: string }) {
   }
 }
 
-export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
+export async function deleteAllChatsByUserId({ userId }: { userId: number }) {
   try {
     const userChats = await db
       .select({ id: chat.id })
@@ -89,7 +89,7 @@ export async function getChatsByUserId({
   startingAfter,
   endingBefore,
 }: {
-  id: string;
+  id: number;
   limit: number;
   startingAfter: string | null;
   endingBefore: string | null;
