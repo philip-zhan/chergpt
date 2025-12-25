@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     let titlePromise: Promise<string> | null = null;
 
     if (chat) {
-      if (chat.userId !== session.userId) {
+      if (String(chat.userId) !== session.userId) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
       if (!isToolApprovalFlow) {
@@ -308,7 +308,7 @@ export async function DELETE(request: Request) {
 
   const chat = await getChatById({ id });
 
-  if (chat?.userId !== session.userId) {
+  if (String(chat?.userId) !== session.userId) {
     return new ChatSDKError("forbidden:chat").toResponse();
   }
 

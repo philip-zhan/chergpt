@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     return Response.json([], { status: 200 });
   }
 
-  if (suggestion.userId !== session.userId) {
+  if (String(suggestion.userId) !== session.userId) {
     return new ChatSDKError("forbidden:api").toResponse();
   }
 
