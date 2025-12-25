@@ -12,6 +12,7 @@ import {
   createResumableStreamContext,
   type ResumableStreamContext,
 } from "resumable-stream";
+import { generateTitleFromUserMessage } from "@/app/(chat)/actions";
 import {
   deleteChatById,
   getChatById,
@@ -36,7 +37,6 @@ import { isProductionEnvironment } from "@/lib/constants";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
-import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
