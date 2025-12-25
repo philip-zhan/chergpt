@@ -1,5 +1,5 @@
 import { Output, streamText, tool, type UIMessageStreamWriter } from "ai";
-import type { Session } from "next-auth";
+import type { Session } from "better-auth";
 import { z } from "zod";
 import { getDocumentById } from "@/db/queries/document";
 import { saveSuggestions } from "@/db/queries/suggestion";
@@ -93,8 +93,8 @@ export const requestSuggestions = ({
         }
       }
 
-      if (session.user?.id) {
-        const userId = session.user.id;
+      if (session.userId) {
+        const userId = Number(session.userId);
 
         await saveSuggestions({
           suggestions: suggestions.map((suggestion) => ({

@@ -1,5 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import {
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -7,7 +8,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { user } from "./user";
+import { user } from "./auth";
 
 export const document = pgTable(
   "document",
@@ -19,7 +20,7 @@ export const document = pgTable(
     kind: varchar("text", { enum: ["text", "code", "image", "sheet"] })
       .notNull()
       .default("text"),
-    userId: uuid("userId")
+    userId: integer("userId")
       .notNull()
       .references(() => user.id),
   },

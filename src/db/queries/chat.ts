@@ -16,15 +16,16 @@ export async function saveChat({
   visibility,
 }: {
   id: string;
-  userId: string;
+  userId: number | string;
   title: string;
   visibility: VisibilityType;
 }) {
+  const userIdNumber = typeof userId === "string" ? Number(userId) : userId;
   try {
     return await db.insert(chat).values({
       id,
       createdAt: new Date(),
-      userId,
+      userId: userIdNumber,
       title,
       visibility,
     });
@@ -52,12 +53,17 @@ export async function deleteChatById({ id }: { id: string }) {
   }
 }
 
-export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
+export async function deleteAllChatsByUserId({
+  userId,
+}: {
+  userId: number | string;
+}) {
+  const userIdNumber = typeof userId === "string" ? Number(userId) : userId;
   try {
     const userChats = await db
       .select({ id: chat.id })
       .from(chat)
-      .where(eq(chat.userId, userId));
+      .where(eq(chat.userId, userIdNumber));
 
     if (userChats.length === 0) {
       return { deletedCount: 0 };
@@ -71,7 +77,7 @@ export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
 
     const deletedChats = await db
       .delete(chat)
-      .where(eq(chat.userId, userId))
+      .where(eq(chat.userId, userIdNumber))
       .returning();
 
     return { deletedCount: deletedChats.length };
@@ -89,11 +95,12 @@ export async function getChatsByUserId({
   startingAfter,
   endingBefore,
 }: {
-  id: string;
+  id: number | string;
   limit: number;
   startingAfter: string | null;
   endingBefore: string | null;
 }) {
+  const userId = typeof id === "string" ? Number(id) : id;
   try {
     const extendedLimit = limit + 1;
 
@@ -103,8 +110,8 @@ export async function getChatsByUserId({
         .from(chat)
         .where(
           whereCondition
-            ? and(whereCondition, eq(chat.userId, id))
-            : eq(chat.userId, id)
+            ? and(whereCondition, eq(chat.userId, userId))
+            : eq(chat.userId, userId)
         )
         .orderBy(desc(chat.createdAt))
         .limit(extendedLimit);
