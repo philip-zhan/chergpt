@@ -11,7 +11,7 @@ export default function SignIn() {
 
   const handleGoogleSignIn = async () => {
     try {
-      // console.log("Auth client baseURL:", authClient);
+      // console.log("Auth client baseURL:", authClient.$fetch.baseURL);
       console.log("Attempting Google sign in...");
       setLoading(true);
       const result = await authClient.signIn.social({

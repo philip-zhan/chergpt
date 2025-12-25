@@ -12,29 +12,27 @@ export async function proxy(request: NextRequest) {
   }
 
   const sessionCookie = await getSessionCookie(request);
-  if (!sessionCookie && !pathname.startsWith("/sign-in")) {
-    return redirectToLogin(request);
+  if (!sessionCookie) {
+    return redirectToAuth(request);
   }
   return NextResponse.next();
 }
 
-function redirectToLogin(request: NextRequest) {
+function redirectToAuth(request: NextRequest) {
   // const redirectTo = request.nextUrl.pathname + request.nextUrl.search;
-  return NextResponse.redirect(new URL("/sign-in", request.url));
+  return NextResponse.redirect(new URL("/auth", request.url));
 }
 
 export const config = {
   matcher: [
-    "/",
-    "/chat/:id",
-    "/api/:path*",
-
     /*
      * Match all request paths except for the ones starting with:
+     * - auth
+     * - api/auth
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!auth|api/auth|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

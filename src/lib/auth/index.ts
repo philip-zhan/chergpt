@@ -7,6 +7,7 @@ import { db } from "@/db";
 import * as schema from "@/db/schemas/auth";
 
 export const auth = betterAuth({
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
@@ -19,10 +20,9 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      // biome-ignore lint: Forbidden non-null assertion.
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      // biome-ignore lint: Forbidden non-null assertion.
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      // prompt: "select_account",
     },
   },
   plugins: [admin(), apiKey(), organization()],
