@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { signIn } from "@/lib/auth/client";
+import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
 export default function SignIn() {
@@ -26,10 +26,10 @@ export default function SignIn() {
               className={cn("w-full gap-2")}
               disabled={loading}
               onClick={async () => {
-                await signIn.social(
+                await authClient.signIn.social(
                   {
                     provider: "google",
-                    callbackURL: "/dashboard",
+                    callbackURL: "/",
                   },
                   {
                     onRequest: () => {
