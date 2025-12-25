@@ -1,11 +1,7 @@
-import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
-import { getSession } from "@/lib/auth";
+import { SidebarWrapper } from "@/components/providers/sidebar";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -19,18 +15,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Suspense>
       </DataStreamProvider>
     </>
-  );
-}
-
-async function SidebarWrapper({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const session = await getSession();
-  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
-
-  return (
-    <SidebarProvider defaultOpen={!isCollapsed}>
-      <AppSidebar user={session} />
-      <SidebarInset>{children}</SidebarInset>
-    </SidebarProvider>
   );
 }

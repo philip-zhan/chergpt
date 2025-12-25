@@ -18,7 +18,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
     >
       <AuthUIProvider
         account={{
-          basePath: "/dashboard/account",
+          basePath: "/account",
           viewPaths: {
             SETTINGS: "#settings",
             SECURITY: "#security",
