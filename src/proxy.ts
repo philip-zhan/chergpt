@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
 
 function redirectToAuth(request: NextRequest) {
   // const redirectTo = request.nextUrl.pathname + request.nextUrl.search;
-  return NextResponse.redirect(new URL("/auth", request.url));
+  return NextResponse.redirect(new URL("/auth/sign-in", request.url));
 }
 
 export const config = {
