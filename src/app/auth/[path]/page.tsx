@@ -10,15 +10,15 @@ export const metadata: Metadata = {
 };
 
 export function generateStaticParams() {
-  return Object.values(authViewPaths).map((pathname) => ({ pathname }));
+  return Object.values(authViewPaths).map((path) => ({ path }));
 }
 
 export default async function AuthPage({
   params,
 }: {
-  params: Promise<{ pathname: string }>;
+  params: Promise<{ path: string }>;
 }) {
-  const { pathname } = await params;
+  const { path } = await params;
 
   return (
     <main className="container mx-auto flex grow flex-col items-center justify-center gap-4 self-center bg-background py-18 sm:py-22">
@@ -33,9 +33,9 @@ export default async function AuthPage({
         </Button>
       </Link>
 
-      <AuthView pathname={pathname} />
+      <AuthView path={path} />
 
-      {["sign-up"].includes(pathname) && (
+      {["sign-up"].includes(path) && (
         <div className="text-center text-muted-foreground text-sm">
           <p>
             By continuing, you agree to our{" "}
