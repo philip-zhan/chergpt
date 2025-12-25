@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { RootProvider } from "@/components/providers/root-client";
@@ -71,6 +72,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <RootProvider>{children}</RootProvider>
+        <Analytics />
       </body>
     </html>
   );
