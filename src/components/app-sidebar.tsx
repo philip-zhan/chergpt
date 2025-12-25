@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@daveyplate/better-auth-ui";
 import type { Session } from "better-auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   useSidebar,
@@ -117,7 +119,9 @@ export function AppSidebar({ user }: { user: Session | undefined }) {
         <SidebarContent>
           <SidebarHistory user={user} />
         </SidebarContent>
-        {/* <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter> */}
+        <SidebarFooter>
+          <UserButton size="sm" />
+        </SidebarFooter>
       </Sidebar>
 
       <AlertDialog
