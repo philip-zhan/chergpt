@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function AccountPage() {
   return (
-    <div>
+    <div className="p-4">
       <HashTabs defaultValue="settings">
         <HashTabsList>
           <HashTabsTrigger value="settings">Settings</HashTabsTrigger>
