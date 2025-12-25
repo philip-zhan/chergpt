@@ -27,4 +27,4 @@ jobs:
         run: pnpm lint
 
       - name: Build
-        run: pnpm build --no-lint
+        run: pnpm build:ci
