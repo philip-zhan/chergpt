@@ -1,10 +1,8 @@
-import { headers } from "next/headers";
+import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   /*
    * Playwright starts the dev server and requires a 200 status to
    * begin the tests, so this ensures that the tests can start
@@ -13,19 +11,16 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session && !pathname.startsWith("/auth")) {
+  const sessionCookie = await getSessionCookie(request);
+  if (!sessionCookie && !pathname.startsWith("/sign-in")) {
     return redirectToLogin(request);
   }
   return NextResponse.next();
 }
 
 function redirectToLogin(request: NextRequest) {
-  const redirectTo = request.nextUrl.pathname + request.nextUrl.search;
-  return NextResponse.redirect(
-    new URL(`/auth/sign-in?redirectTo=${redirectTo}`, request.url)
-  );
+  // const redirectTo = request.nextUrl.pathname + request.nextUrl.search;
+  return NextResponse.redirect(new URL("/sign-in", request.url));
 }
 
 export const config = {
