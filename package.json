@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:prod": "tsx lib/db/migrate && next build",
+    "build:prod": "pnpm db:migrate && next build",
     "start": "next start",
     "lint": "npx ultracite@latest check",
     "format": "npx ultracite@latest fix",
