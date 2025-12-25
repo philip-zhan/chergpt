@@ -94,7 +94,7 @@ export const requestSuggestions = ({
       }
 
       if (session.userId) {
-        const userId = session.userId;
+        const userId = Number(session.userId);
 
         await saveSuggestions({
           suggestions: suggestions.map((suggestion) => ({

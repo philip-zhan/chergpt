@@ -18,8 +18,9 @@ export async function saveDocument({
   title: string;
   kind: ArtifactKind;
   content: string;
-  userId: number;
+  userId: number | string;
 }) {
+  const userIdNumber = typeof userId === "string" ? Number(userId) : userId;
   try {
     return await db
       .insert(document)
@@ -28,7 +29,7 @@ export async function saveDocument({
         title,
         kind,
         content,
-        userId,
+        userId: userIdNumber,
         createdAt: new Date(),
       })
       .returning();
