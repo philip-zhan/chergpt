@@ -36,7 +36,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
       return notFound();
     }
 
-    if (session.userId !== chat.userId) {
+    if (session.userId !== String(chat.userId)) {
       return notFound();
     }
   }
@@ -59,7 +59,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
           initialChatModel={DEFAULT_CHAT_MODEL}
           initialMessages={uiMessages}
           initialVisibilityType={chat.visibility}
-          isReadonly={session?.userId !== chat.userId}
+          isReadonly={session?.userId !== String(chat.userId)}
         />
         <DataStreamHandler />
       </>
@@ -74,7 +74,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
         initialChatModel={chatModelFromCookie.value}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
-        isReadonly={session?.userId !== chat.userId}
+        isReadonly={session?.userId !== String(chat.userId)}
       />
       <DataStreamHandler />
     </>
