@@ -9,6 +9,22 @@ import { cn } from "@/lib/utils";
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleSignIn = async () => {
+    try {
+      // console.log("Auth client baseURL:", authClient);
+      console.log("Attempting Google sign in...");
+      setLoading(true);
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+      console.log("Sign in result:", result);
+    } catch (error) {
+      console.error("Sign in exception:", error);
+      setLoading(false);
+    }
+  };
+
   return (
     <Card className="max-w-md">
       <CardHeader>
@@ -25,22 +41,8 @@ export default function SignIn() {
             <Button
               className={cn("w-full gap-2")}
               disabled={loading}
-              onClick={async () => {
-                await authClient.signIn.social(
-                  {
-                    provider: "google",
-                    callbackURL: "/",
-                  },
-                  {
-                    onRequest: () => {
-                      setLoading(true);
-                    },
-                    onResponse: () => {
-                      setLoading(false);
-                    },
-                  }
-                );
-              }}
+              onClick={handleGoogleSignIn}
+              type="button"
               variant="outline"
             >
               <svg
