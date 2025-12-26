@@ -18,12 +18,13 @@ export function RootProvider({ children }: { children: ReactNode }) {
     >
       <AuthUIProvider
         account={{
-          basePath: "/account",
+          basePath: "/settings",
           viewPaths: {
-            SETTINGS: "#settings",
+            SETTINGS: "#account",
             SECURITY: "#security",
-            API_KEYS: "#api-keys",
+            API_KEYS: "#security",
             ORGANIZATIONS: "#organizations",
+            TEAMS: "#organizations",
           },
         }}
         apiKey={{

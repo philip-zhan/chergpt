@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/hash-tabs";
 
 export const metadata: Metadata = {
-  title: "Account Settings",
+  title: "Settings",
 };
 
 export default function AccountPage() {
@@ -22,19 +22,16 @@ export default function AccountPage() {
     <div className="p-4">
       <HashTabs defaultValue="settings">
         <HashTabsList>
-          <HashTabsTrigger value="settings">Settings</HashTabsTrigger>
+          <HashTabsTrigger value="account">Account</HashTabsTrigger>
           <HashTabsTrigger value="security">Security</HashTabsTrigger>
-          <HashTabsTrigger value="api">API Keys</HashTabsTrigger>
           <HashTabsTrigger value="organizations">Organizations</HashTabsTrigger>
         </HashTabsList>
-        <HashTabsContent className="space-y-4" value="settings">
+        <HashTabsContent className="space-y-4" value="account">
           <AccountSettingsCards />
           <DeleteAccountCard />
         </HashTabsContent>
-        <HashTabsContent value="security">
+        <HashTabsContent className="space-y-4" value="security">
           <SecuritySettingsCards />
-        </HashTabsContent>
-        <HashTabsContent value="api">
           <ApiKeysCard />
         </HashTabsContent>
         <HashTabsContent value="organizations">
