@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Calendar,
-  CheckCircle2,
-  Github,
-  HardDrive,
-  Mail,
-  MessageSquare,
-  StickyNote,
-} from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +14,7 @@ interface Connection {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
+  iconSrc: string;
   connected: boolean;
   comingSoon: boolean;
 }
@@ -32,7 +24,7 @@ const connections: Connection[] = [
     id: "gmail",
     name: "Gmail",
     description: "Connect your Gmail account for email notifications",
-    icon: <Mail className="h-5 w-5" />,
+    iconSrc: "/images/Gmail/Gmail.svg",
     connected: false,
     comingSoon: false,
   },
@@ -41,7 +33,7 @@ const connections: Connection[] = [
     id: "google-calendar",
     name: "Google Calendar",
     description: "Sync your calendar events and schedule meetings",
-    icon: <Calendar className="h-5 w-5" />,
+    iconSrc: "/images/google-calendar.svg",
     connected: false,
     comingSoon: false,
   },
@@ -49,7 +41,7 @@ const connections: Connection[] = [
     id: "google-drive",
     name: "Google Drive",
     description: "Access and manage your Google Drive files",
-    icon: <HardDrive className="h-5 w-5" />,
+    iconSrc: "/images/google-drive.svg",
     connected: false,
     comingSoon: false,
   },
@@ -57,7 +49,7 @@ const connections: Connection[] = [
     id: "slack",
     name: "Slack",
     description: "Connect your Slack workspace for notifications and updates",
-    icon: <MessageSquare className="h-5 w-5" />,
+    iconSrc: "/images/slack.svg",
     connected: false,
     comingSoon: true,
   },
@@ -65,7 +57,7 @@ const connections: Connection[] = [
     id: "github",
     name: "GitHub",
     description: "Integrate with GitHub repositories and issues",
-    icon: <Github className="h-5 w-5" />,
+    iconSrc: "/images/github.svg",
     connected: false,
     comingSoon: true,
   },
@@ -73,7 +65,7 @@ const connections: Connection[] = [
     id: "notion",
     name: "Notion",
     description: "Connect your Notion workspace for seamless collaboration",
-    icon: <StickyNote className="h-5 w-5" />,
+    iconSrc: "/images/Notion/Notion_Symbol_0.svg",
     connected: false,
     comingSoon: true,
   },
@@ -81,7 +73,7 @@ const connections: Connection[] = [
     id: "linear",
     name: "Linear",
     description: "Manage issues and track project progress",
-    icon: <CheckCircle2 className="h-5 w-5" />,
+    iconSrc: "/images/Linear/Linear_Symbol_0.svg",
     connected: false,
     comingSoon: true,
   },
@@ -114,7 +106,13 @@ export function ConnectionsCard() {
           >
             <div className="flex items-center gap-4 flex-1">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                {connection.icon}
+                <Image
+                  alt={connection.name}
+                  className="h-5 w-5"
+                  height={20}
+                  src={connection.iconSrc}
+                  width={20}
+                />
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
