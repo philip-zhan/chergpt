@@ -5,10 +5,10 @@ import {
   CheckCircle2,
   Github,
   HardDrive,
+  Mail,
   MessageSquare,
   StickyNote,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,33 +24,26 @@ interface Connection {
   description: string;
   icon: React.ReactNode;
   connected: boolean;
-  category: string;
+  comingSoon: boolean;
 }
 
 const connections: Connection[] = [
   {
-    id: "slack",
-    name: "Slack",
-    description: "Connect your Slack workspace for notifications and updates",
-    icon: <MessageSquare className="h-5 w-5" />,
+    id: "gmail",
+    name: "Gmail",
+    description: "Connect your Gmail account for email notifications",
+    icon: <Mail className="h-5 w-5" />,
     connected: false,
-    category: "Communication",
+    comingSoon: false,
   },
-  {
-    id: "github",
-    name: "GitHub",
-    description: "Integrate with GitHub repositories and issues",
-    icon: <Github className="h-5 w-5" />,
-    connected: false,
-    category: "Development",
-  },
+
   {
     id: "google-calendar",
     name: "Google Calendar",
     description: "Sync your calendar events and schedule meetings",
     icon: <Calendar className="h-5 w-5" />,
     connected: false,
-    category: "Productivity",
+    comingSoon: false,
   },
   {
     id: "google-drive",
@@ -58,7 +51,23 @@ const connections: Connection[] = [
     description: "Access and manage your Google Drive files",
     icon: <HardDrive className="h-5 w-5" />,
     connected: false,
-    category: "Storage",
+    comingSoon: false,
+  },
+  {
+    id: "slack",
+    name: "Slack",
+    description: "Connect your Slack workspace for notifications and updates",
+    icon: <MessageSquare className="h-5 w-5" />,
+    connected: false,
+    comingSoon: true,
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    description: "Integrate with GitHub repositories and issues",
+    icon: <Github className="h-5 w-5" />,
+    connected: false,
+    comingSoon: true,
   },
   {
     id: "notion",
@@ -66,7 +75,7 @@ const connections: Connection[] = [
     description: "Connect your Notion workspace for seamless collaboration",
     icon: <StickyNote className="h-5 w-5" />,
     connected: false,
-    category: "Productivity",
+    comingSoon: true,
   },
   {
     id: "linear",
@@ -74,7 +83,7 @@ const connections: Connection[] = [
     description: "Manage issues and track project progress",
     icon: <CheckCircle2 className="h-5 w-5" />,
     connected: false,
-    category: "Development",
+    comingSoon: true,
   },
 ];
 
@@ -112,9 +121,6 @@ export function ConnectionsCard() {
                   <h4 className="text-sm font-medium leading-none">
                     {connection.name}
                   </h4>
-                  <Badge className="text-xs" variant="secondary">
-                    {connection.category}
-                  </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {connection.description}
@@ -131,8 +137,12 @@ export function ConnectionsCard() {
                   Disconnect
                 </Button>
               ) : (
-                <Button onClick={() => handleConnect(connection.id)} size="sm">
-                  Connect
+                <Button
+                  disabled={connection.comingSoon}
+                  onClick={() => handleConnect(connection.id)}
+                  size="sm"
+                >
+                  {connection.comingSoon ? "Coming soon" : "Connect"}
                 </Button>
               )}
             </div>
