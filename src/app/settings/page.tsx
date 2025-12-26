@@ -6,6 +6,7 @@ import {
   SecuritySettingsCards,
 } from "@daveyplate/better-auth-ui";
 import type { Metadata } from "next";
+import { ConnectionsCard } from "@/components/connections-card";
 import {
   HashTabs,
   HashTabsContent,
@@ -25,6 +26,7 @@ export default function AccountPage() {
           <HashTabsTrigger value="account">Account</HashTabsTrigger>
           <HashTabsTrigger value="security">Security</HashTabsTrigger>
           <HashTabsTrigger value="organizations">Organizations</HashTabsTrigger>
+          <HashTabsTrigger value="connections">Connections</HashTabsTrigger>
         </HashTabsList>
         <HashTabsContent className="space-y-4" value="account">
           <AccountSettingsCards />
@@ -36,6 +38,9 @@ export default function AccountPage() {
         </HashTabsContent>
         <HashTabsContent value="organizations">
           <OrganizationsCard />
+        </HashTabsContent>
+        <HashTabsContent className="space-y-4" value="connections">
+          <ConnectionsCard />
         </HashTabsContent>
       </HashTabs>
     </div>
