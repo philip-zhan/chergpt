@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
+import { SuspenseWrapper } from "@/components/suspense-wrapper";
 import { getChatById } from "@/db/queries/chat";
 import { getMessagesByChatId } from "@/db/queries/message";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
@@ -11,9 +11,9 @@ import { convertToUIMessages } from "@/lib/utils";
 
 export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<div className="flex h-dvh" />}>
+    <SuspenseWrapper>
       <ChatPage params={props.params} />
-    </Suspense>
+    </SuspenseWrapper>
   );
 }
 
