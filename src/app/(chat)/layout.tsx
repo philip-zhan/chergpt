@@ -1,7 +1,6 @@
 import Script from "next/script";
-import { Suspense } from "react";
 import { DataStreamProvider } from "@/components/data-stream-provider";
-import { SidebarWrapper } from "@/components/providers/sidebar";
+import { SuspenseWrapper } from "@/components/suspense-wrapper";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -10,9 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <Suspense fallback={<div className="flex h-dvh" />}>
-          <SidebarWrapper>{children}</SidebarWrapper>
-        </Suspense>
+        <SuspenseWrapper>{children}</SuspenseWrapper>
       </DataStreamProvider>
     </>
   );

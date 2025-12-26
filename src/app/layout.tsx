@@ -2,7 +2,8 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { RootProvider } from "@/components/providers/root-client";
-
+import { SidebarWrapper } from "@/components/providers/sidebar";
+import { SuspenseWrapper } from "@/components/suspense-wrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -71,7 +72,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider>
+          <SuspenseWrapper>
+            <SidebarWrapper>{children}</SidebarWrapper>
+          </SuspenseWrapper>
+        </RootProvider>
         <Analytics />
       </body>
     </html>

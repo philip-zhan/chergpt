@@ -1,15 +1,15 @@
 import { cookies } from "next/headers";
-import { Suspense } from "react";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
+import { SuspenseWrapper } from "@/components/suspense-wrapper";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="flex h-dvh" />}>
+    <SuspenseWrapper>
       <NewChatPage />
-    </Suspense>
+    </SuspenseWrapper>
   );
 }
 
