@@ -92,7 +92,7 @@ export function ConnectionsCard() {
   // Fetch connection status on mount
   useEffect(() => {
     const fetchConnectionStatus = async () => {
-      const providers = ["gmail", "google-calendar", "google-drive"];
+      const providers = connections.filter((c) => !c.comingSoon).map((c) => c.id);
 
       for (const provider of providers) {
         try {
