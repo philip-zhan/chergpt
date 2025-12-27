@@ -1,6 +1,9 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +20,8 @@ interface Connection {
   iconSrc: string;
   connected: boolean;
   comingSoon: boolean;
+  email?: string;
+  loading?: boolean;
 }
 
 const connections: Connection[] = [
@@ -80,14 +85,135 @@ const connections: Connection[] = [
 ];
 
 export function ConnectionsCard() {
-  const handleConnect = (connectionId: string) => {
-    // OAuth flow will be implemented later
-    console.log(`Connecting to ${connectionId}...`);
+  const [connectionStates, setConnectionStates] = useState<
+    Record<string, { connected: boolean; email?: string; loading: boolean }>
+  >({});
+
+  // Fetch connection status on mount
+  useEffect(() => {
+    const fetchConnectionStatus = async () => {
+      const providers = connections.filter((c) => !c.comingSoon).map((c) => c.id);
+
+      for (const provider of providers) {
+        try {
+          const response = await fetch(`/api/connections/${provider}`);
+          if (response.ok) {
+            const data = await response.json();
+            setConnectionStates((prev) => ({
+              ...prev,
+              [provider]: {
+                connected: data.connected,
+                email: data.email,
+                loading: false,
+              },
+            }));
+          }
+        } catch (error) {
+          console.error(`Error fetching ${provider} status:`, error);
+        }
+      }
+    };
+
+    fetchConnectionStatus();
+
+    // Check for OAuth callback success/error in URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "connected") {
+      toast.success("Connection successful", {
+        description: "Your account has been connected.",
+      });
+      // Clean up URL
+      window.history.replaceState({}, "", "/settings#connections");
+      // Refresh connection status
+      fetchConnectionStatus();
+    } else if (params.get("error")) {
+      const errorType = params.get("error");
+      let errorMessage = "Failed to connect your account. Please try again.";
+
+      // Provide specific error messages
+      if (errorType === "insufficient_permissions") {
+        errorMessage =
+          "You need to grant all requested permissions to connect this service.";
+      } else if (errorType === "invalid_state") {
+        errorMessage = "Security validation failed. Please try again.";
+      } else if (errorType === "missing_provider") {
+        errorMessage = "Invalid connection request. Please try again.";
+      } else if (errorType) {
+        errorMessage = `Connection failed: ${errorType}. Please try again.`;
+      }
+
+      toast.error("Connection failed", {
+        description: errorMessage,
+      });
+      window.history.replaceState({}, "", "/settings#connections");
+    }
+  }, []);
+
+  const handleConnect = async (connectionId: string) => {
+    setConnectionStates((prev) => ({
+      ...prev,
+      [connectionId]: { ...prev[connectionId], loading: true },
+    }));
+
+    try {
+      const response = await fetch("/api/connections/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: connectionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to initiate OAuth");
+      }
+
+      const data = await response.json();
+      // Redirect to OAuth URL
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error("Error initiating OAuth:", error);
+      toast.error("Connection failed", {
+        description: "Failed to start connection. Please try again.",
+      });
+      setConnectionStates((prev) => ({
+        ...prev,
+        [connectionId]: { ...prev[connectionId], loading: false },
+      }));
+    }
   };
 
-  const handleDisconnect = (connectionId: string) => {
-    // Disconnect logic will be implemented later
-    console.log(`Disconnecting from ${connectionId}...`);
+  const handleDisconnect = async (connectionId: string) => {
+    setConnectionStates((prev) => ({
+      ...prev,
+      [connectionId]: { ...prev[connectionId], loading: true },
+    }));
+
+    try {
+      const response = await fetch(`/api/connections/${connectionId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to disconnect");
+      }
+
+      setConnectionStates((prev) => ({
+        ...prev,
+        [connectionId]: { connected: false, loading: false },
+      }));
+
+      toast.success("Disconnected", {
+        description: "Your account has been disconnected.",
+      });
+    } catch (error) {
+      console.error("Error disconnecting:", error);
+      toast.error("Disconnection failed", {
+        description: "Failed to disconnect. Please try again.",
+      });
+      setConnectionStates((prev) => ({
+        ...prev,
+        [connectionId]: { ...prev[connectionId], loading: false },
+      }));
+    }
   };
 
   return (
@@ -99,53 +225,69 @@ export function ConnectionsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {connections.map((connection) => (
-          <div
-            className="flex items-center justify-between gap-4 rounded-lg border p-4"
-            key={connection.id}
-          >
-            <div className="flex items-center gap-4 flex-1">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                <Image
-                  alt={connection.name}
-                  className="h-5 w-5"
-                  height={20}
-                  src={connection.iconSrc}
-                  width={20}
-                />
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-medium leading-none">
-                    {connection.name}
-                  </h4>
+        {connections.map((connection) => {
+          const state = connectionStates[connection.id];
+          const isConnected = state?.connected || false;
+          const isLoading = state?.loading || false;
+          const email = state?.email;
+
+          return (
+            <div
+              className="flex items-center justify-between gap-4 rounded-lg border p-4"
+              key={connection.id}
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                  <Image
+                    alt={connection.name}
+                    className="h-5 w-5"
+                    height={20}
+                    src={connection.iconSrc}
+                    width={20}
+                  />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {connection.description}
-                </p>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-medium leading-none">
+                      {connection.name}
+                    </h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {isConnected && email
+                      ? `Connected as ${email}`
+                      : connection.description}
+                  </p>
+                </div>
+              </div>
+              <div>
+                {isConnected ? (
+                  <Button
+                    disabled={isLoading}
+                    onClick={() => handleDisconnect(connection.id)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Disconnect
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={connection.comingSoon || isLoading}
+                    onClick={() => handleConnect(connection.id)}
+                    size="sm"
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {connection.comingSoon ? "Coming soon" : "Connect"}
+                  </Button>
+                )}
               </div>
             </div>
-            <div>
-              {connection.connected ? (
-                <Button
-                  onClick={() => handleDisconnect(connection.id)}
-                  size="sm"
-                  variant="outline"
-                >
-                  Disconnect
-                </Button>
-              ) : (
-                <Button
-                  disabled={connection.comingSoon}
-                  onClick={() => handleConnect(connection.id)}
-                  size="sm"
-                >
-                  {connection.comingSoon ? "Coming soon" : "Connect"}
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );
