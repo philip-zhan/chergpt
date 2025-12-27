@@ -17,19 +17,21 @@ export async function GET(request: NextRequest) {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000";
-  const settingsUrl = `${baseUrl}/settings#connections`;
+  const settingsUrl = `${baseUrl}/settings`;
 
   // Handle error from Google
   if (error) {
     console.error("OAuth error:", error);
     return NextResponse.redirect(
-      `${settingsUrl}?error=${encodeURIComponent(error)}`
+      `${settingsUrl}?error=${encodeURIComponent(error)}#connections`
     );
   }
 
   // Validate required parameters
   if (!code || !state) {
-    return NextResponse.redirect(`${settingsUrl}?error=missing_parameters`);
+    return NextResponse.redirect(
+      `${settingsUrl}?error=missing_parameters#connections`
+    );
   }
 
   try {
@@ -45,11 +47,15 @@ export async function GET(request: NextRequest) {
     const provider = cookieStore.get("oauth_provider")?.value as Provider;
 
     if (!savedState || savedState !== state) {
-      return NextResponse.redirect(`${settingsUrl}?error=invalid_state`);
+      return NextResponse.redirect(
+        `${settingsUrl}?error=invalid_state#connections`
+      );
     }
 
     if (!provider) {
-      return NextResponse.redirect(`${settingsUrl}?error=missing_provider`);
+      return NextResponse.redirect(
+        `${settingsUrl}?error=missing_provider#connections`
+      );
     }
 
     // Clear state cookies
@@ -81,9 +87,13 @@ export async function GET(request: NextRequest) {
     });
 
     // Redirect back to settings with success
-    return NextResponse.redirect(`${settingsUrl}?success=connected`);
+    return NextResponse.redirect(
+      `${settingsUrl}?success=connected#connections`
+    );
   } catch (error) {
     console.error("Error in OAuth callback:", error);
-    return NextResponse.redirect(`${settingsUrl}?error=callback_failed`);
+    return NextResponse.redirect(
+      `${settingsUrl}?error=callback_failed#connections`
+    );
   }
 }

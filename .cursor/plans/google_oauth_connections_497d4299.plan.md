@@ -301,4 +301,3 @@ Create [`src/lib/connections/refresh-job.ts`](src/lib/connections/refresh-job.ts
 - `src/lib/connections/google-client.ts` - Google OAuth client
 - `src/app/api/connections/initiate/route.ts` - Start OAuth
 - `src/app/api/connections/callback/route.ts` - OAuth callback
-- `src/app/api/connections/[provider]/route.ts` - Get/delete connection

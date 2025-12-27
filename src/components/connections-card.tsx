@@ -117,16 +117,19 @@ export function ConnectionsCard() {
     fetchConnectionStatus();
 
     // Check for OAuth callback success/error in URL
-    const params = new URLSearchParams(window.location.hash.split("?")[1]);
+    const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "connected") {
       toast.success("Connection successful", {
         description: "Your account has been connected.",
       });
       // Clean up URL
       window.history.replaceState({}, "", "/settings#connections");
+      // Refresh connection status
+      fetchConnectionStatus();
     } else if (params.get("error")) {
+      const errorType = params.get("error");
       toast.error("Connection failed", {
-        description: "Failed to connect your account. Please try again.",
+        description: `Failed to connect your account${errorType ? `: ${errorType}` : ""}. Please try again.`,
       });
       window.history.replaceState({}, "", "/settings#connections");
     }
