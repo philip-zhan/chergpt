@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import {
   buildAuthUrl,
-  getProviderScopes,
+  getProviderSpecificScopes,
   type Provider,
 } from "@/lib/connections/google-client";
 
@@ -59,9 +59,10 @@ export async function POST(request: Request) {
       path: "/",
     });
 
-    // Store requested scopes for verification in callback
-    const requestedScopes = getProviderScopes(provider as Provider);
-    cookieStore.set("oauth_scopes", JSON.stringify(requestedScopes), {
+    // Store provider-specific scopes for verification in callback
+    // (we only verify the provider-specific scopes, not the default openid/email/profile)
+    const providerScopes = getProviderSpecificScopes(provider as Provider);
+    cookieStore.set("oauth_scopes", JSON.stringify(providerScopes), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

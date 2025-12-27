@@ -6,6 +6,7 @@ import {
   exchangeCodeForTokens,
   getUserInfo,
   type Provider,
+  revokeToken,
   verifyScopes,
 } from "@/lib/connections/google-client";
 import { encryptToken } from "@/lib/connections/token-manager";
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const savedState = cookieStore.get("oauth_state")?.value;
     const provider = cookieStore.get("oauth_provider")?.value as Provider;
-    const requestedScopesJson = cookieStore.get("oauth_scopes")?.value;
+    const providerScopesJson = cookieStore.get("oauth_scopes")?.value;
 
     if (!savedState || savedState !== state) {
       return NextResponse.redirect(
@@ -68,18 +69,22 @@ export async function GET(request: NextRequest) {
     // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code);
 
-    // Verify that all requested scopes were granted
+    // Verify that provider-specific scopes were granted
+    // (we don't verify default openid/email/profile scopes)
     try {
-      const requestedScopes = JSON.parse(
-        requestedScopesJson || "[]"
-      ) as string[];
-      const scopeVerification = verifyScopes(requestedScopes, tokens.scope);
+      const providerScopes = JSON.parse(providerScopesJson || "[]") as string[];
+      const scopeVerification = verifyScopes(providerScopes, tokens.scope);
 
       if (!scopeVerification.valid) {
         console.error(
-          "Scope mismatch. Missing scopes:",
+          "Scope mismatch. Missing provider-specific scopes:",
           scopeVerification.missing
         );
+
+        // Revoke the token since it doesn't have the required permissions
+        // This ensures a clean slate when the user tries to connect again
+        await revokeToken(tokens.accessToken);
+
         return NextResponse.redirect(
           `${settingsUrl}?error=insufficient_permissions#connections`
         );

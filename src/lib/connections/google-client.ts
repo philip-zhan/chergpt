@@ -32,10 +32,10 @@ export function getOAuthClient() {
  */
 export function buildAuthUrl(provider: Provider, state: string): string {
   const oauth2Client = getOAuthClient();
-
+  const scopes = [...DEFAULT_SCOPES, ...PROVIDER_SCOPES[provider]];
   return oauth2Client.generateAuthUrl({
     access_type: "offline", // Request refresh token
-    scope: getProviderScopes(provider),
+    scope: scopes,
     state,
     prompt: "consent", // Force consent to always get refresh token
   });
@@ -99,10 +99,10 @@ export async function revokeToken(token: string): Promise<void> {
 }
 
 /**
- * Get the scopes for a specific provider
+ * Get only the provider-specific scopes (without default openid/email/profile)
  */
-export function getProviderScopes(provider: Provider): string[] {
-  return [...DEFAULT_SCOPES, ...PROVIDER_SCOPES[provider]];
+export function getProviderSpecificScopes(provider: Provider): string[] {
+  return PROVIDER_SCOPES[provider];
 }
 
 /**
