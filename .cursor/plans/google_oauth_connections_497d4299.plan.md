@@ -292,12 +292,3 @@ Create [`src/lib/connections/refresh-job.ts`](src/lib/connections/refresh-job.ts
 4. **Scope Minimization**: Only request read-only scopes needed
 5. **Token Rotation**: Refresh tokens before expiry
 6. **Rate Limiting**: Add rate limits to OAuth endpoints
-
-## Files to Create
-
-- `src/db/schemas/connection.ts` - Connection table schema
-- `src/db/queries/connection.ts` - Database queries
-- `src/lib/connections/token-manager.ts` - Token encryption & refresh
-- `src/lib/connections/google-client.ts` - Google OAuth client
-- `src/app/api/connections/initiate/route.ts` - Start OAuth
-- `src/app/api/connections/callback/route.ts` - OAuth callback
