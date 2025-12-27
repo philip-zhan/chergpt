@@ -4,51 +4,51 @@ overview: Implement OAuth 2.0 flow for Gmail, Google Calendar, and Google Drive 
 todos:
   - id: database-schema
     content: Create connection table schema and add relations
-    status: pending
+    status: completed
   - id: token-manager
     content: Implement token encryption and refresh logic
-    status: pending
+    status: completed
   - id: google-client
     content: Create Google OAuth client utilities
-    status: pending
+    status: completed
   - id: db-queries
     content: Implement connection database queries
-    status: pending
+    status: completed
     dependencies:
       - database-schema
   - id: oauth-initiate-api
     content: Create OAuth initiation endpoint
-    status: pending
+    status: completed
     dependencies:
       - google-client
       - token-manager
   - id: oauth-callback-api
     content: Create OAuth callback endpoint
-    status: pending
+    status: completed
     dependencies:
       - google-client
       - token-manager
       - db-queries
   - id: connection-status-api
     content: Create connection status and delete endpoints
-    status: pending
+    status: completed
     dependencies:
       - db-queries
   - id: ui-integration
     content: Update ConnectionsCard with API integration
-    status: pending
+    status: completed
     dependencies:
       - oauth-initiate-api
       - oauth-callback-api
       - connection-status-api
   - id: migration
     content: Generate and run database migration
-    status: pending
+    status: completed
     dependencies:
       - database-schema
   - id: testing
     content: Test OAuth flow end-to-end for all three providers
-    status: pending
+    status: completed
     dependencies:
       - ui-integration
       - migration
@@ -205,9 +205,7 @@ Create [`src/lib/connections/token-manager.ts`](src/lib/connections/token-manage
 - `refreshAccessToken(connection: Connection): Promise<Connection>` - Refresh expired token
 - `isTokenExpired(connection: Connection): boolean` - Check if refresh needed
 
-**Encryption:**
-
-Use `crypto` module with `AES-256-GCM` and store key in environment variable `ENCRYPTION_KEY`.
+**Encryption:**Use `crypto` module with `AES-256-GCM` and store key in environment variable `ENCRYPTION_KEY`.
 
 ## 5. Google API Client
 
@@ -306,5 +304,3 @@ Create [`src/lib/connections/refresh-job.ts`](src/lib/connections/refresh-job.ts
 - `src/app/api/connections/[provider]/route.ts` - Get/delete connection
 
 ## Files to Modify
-
-- [`src/components/connections-card.tsx`](src/components/connections-card.tsx) - Wire up OAuth flow
