@@ -5,7 +5,7 @@ import { revokeToken } from "@/lib/connections/google-client";
 import { decryptToken } from "@/lib/connections/token-manager";
 
 type RouteContext = {
-  params: { provider: string };
+  params: Promise<{ provider: string }>;
 };
 
 /**
@@ -14,7 +14,7 @@ type RouteContext = {
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const { provider } = context.params;
+    const { provider } = await context.params;
 
     // Verify user is authenticated
     const user = await getUser();
@@ -51,7 +51,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
  */
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
-    const { provider } = context.params;
+    const { provider } = await context.params;
 
     // Verify user is authenticated
     const user = await getUser();
