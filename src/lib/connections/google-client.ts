@@ -3,9 +3,24 @@ import { google } from "googleapis";
 export type Provider = "gmail" | "google-calendar" | "google-drive";
 
 const SCOPES: Record<Provider, string[]> = {
-  gmail: ["https://www.googleapis.com/auth/gmail.readonly"],
-  "google-calendar": ["https://www.googleapis.com/auth/calendar.readonly"],
-  "google-drive": ["https://www.googleapis.com/auth/drive.readonly"],
+  gmail: [
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "openid",
+    "email",
+    "profile",
+  ],
+  "google-calendar": [
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "openid",
+    "email",
+    "profile",
+  ],
+  "google-drive": [
+    "https://www.googleapis.com/auth/drive.readonly",
+    "openid",
+    "email",
+    "profile",
+  ],
 };
 
 /**
