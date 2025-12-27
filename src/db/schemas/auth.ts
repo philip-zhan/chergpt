@@ -8,6 +8,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { connection } from "./connection";
 
 export const user = pgTable("user", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -196,6 +197,7 @@ export const userRelations = relations(user, ({ many }) => ({
   apikeys: many(apikey),
   members: many(member),
   invitations: many(invitation),
+  connections: many(connection),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({

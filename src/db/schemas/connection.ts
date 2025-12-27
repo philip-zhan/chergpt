@@ -44,8 +44,3 @@ export const connectionRelations = relations(connection, ({ one }) => ({
     references: [user.id],
   }),
 }));
-
-// Add connection relation to user
-export const userConnectionRelations = relations(user, ({ many }) => ({
-  connections: many(connection),
-}));
