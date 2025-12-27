@@ -2,26 +2,13 @@ import { google } from "googleapis";
 
 export type Provider = "gmail" | "google-calendar" | "google-drive";
 
-const SCOPES: Record<Provider, string[]> = {
-  gmail: [
-    "https://www.googleapis.com/auth/gmail.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
-  "google-calendar": [
-    "https://www.googleapis.com/auth/calendar.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
-  "google-drive": [
-    "https://www.googleapis.com/auth/drive.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
+const PROVIDER_SCOPES: Record<Provider, string[]> = {
+  gmail: ["https://www.googleapis.com/auth/gmail.readonly"],
+  "google-calendar": ["https://www.googleapis.com/auth/calendar.readonly"],
+  "google-drive": ["https://www.googleapis.com/auth/drive.readonly"],
 };
+
+const DEFAULT_SCOPES: string[] = ["openid", "email", "profile"];
 
 /**
  * Get the OAuth2 client configured with credentials
@@ -45,15 +32,10 @@ export function getOAuthClient() {
  */
 export function buildAuthUrl(provider: Provider, state: string): string {
   const oauth2Client = getOAuthClient();
-  const scopes = SCOPES[provider];
-
-  if (!scopes) {
-    throw new Error(`Invalid provider: ${provider}`);
-  }
 
   return oauth2Client.generateAuthUrl({
     access_type: "offline", // Request refresh token
-    scope: scopes,
+    scope: getProviderScopes(provider),
     state,
     prompt: "consent", // Force consent to always get refresh token
   });
@@ -120,5 +102,5 @@ export async function revokeToken(token: string): Promise<void> {
  * Get the scopes for a specific provider
  */
 export function getProviderScopes(provider: Provider): string[] {
-  return SCOPES[provider] || [];
+  return [...DEFAULT_SCOPES, ...PROVIDER_SCOPES[provider]];
 }
