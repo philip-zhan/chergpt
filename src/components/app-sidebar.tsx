@@ -1,18 +1,14 @@
 "use client";
 
 import { UserButton } from "@daveyplate/better-auth-ui";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "better-auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
 import { PlusIcon, TrashIcon } from "@/components/icons";
-import {
-  getChatHistoryPaginationKey,
-  SidebarHistory,
-} from "@/components/sidebar-history";
+import { SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -34,28 +30,42 @@ import {
 } from "./ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
+// Delete all chats
+async function deleteAllChats(): Promise<void> {
+  const response = await fetch("/api/history", {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete all chats");
+  }
+}
+
 export function AppSidebar({ user }: { user: Session | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
-  const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
-    });
+  // Mutation for deleting all chats
+  const deleteAllMutation = useMutation({
+    mutationFn: deleteAllChats,
+    onSuccess: () => {
+      // Invalidate chat history queries
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+      setShowDeleteAllDialog(false);
+      router.replace("/");
+      router.refresh();
+      toast.success("All chats deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Error deleting all chats:", error);
+      toast.error("Failed to delete all chats");
+    },
+  });
 
-    toast.promise(deletePromise, {
-      loading: "Deleting all chats...",
-      success: () => {
-        mutate(unstable_serialize(getChatHistoryPaginationKey));
-        setShowDeleteAllDialog(false);
-        router.replace("/");
-        router.refresh();
-        return "All chats deleted successfully";
-      },
-      error: "Failed to delete all chats",
-    });
+  const handleDeleteAll = () => {
+    deleteAllMutation.mutate();
   };
 
   return (
@@ -81,6 +91,7 @@ export function AppSidebar({ user }: { user: Session | undefined }) {
                     <TooltipTrigger asChild>
                       <Button
                         className="h-8 p-1 md:h-fit md:p-2"
+                        disabled={deleteAllMutation.isPending}
                         onClick={() => setShowDeleteAllDialog(true)}
                         type="button"
                         variant="ghost"
@@ -138,8 +149,11 @@ export function AppSidebar({ user }: { user: Session | undefined }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
+            <AlertDialogAction
+              disabled={deleteAllMutation.isPending}
+              onClick={handleDeleteAll}
+            >
+              {deleteAllMutation.isPending ? "Deleting..." : "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
