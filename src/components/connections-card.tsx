@@ -128,8 +128,22 @@ export function ConnectionsCard() {
       fetchConnectionStatus();
     } else if (params.get("error")) {
       const errorType = params.get("error");
+      let errorMessage = "Failed to connect your account. Please try again.";
+
+      // Provide specific error messages
+      if (errorType === "insufficient_permissions") {
+        errorMessage =
+          "You need to grant all requested permissions to connect this service.";
+      } else if (errorType === "invalid_state") {
+        errorMessage = "Security validation failed. Please try again.";
+      } else if (errorType === "missing_provider") {
+        errorMessage = "Invalid connection request. Please try again.";
+      } else if (errorType) {
+        errorMessage = `Connection failed: ${errorType}. Please try again.`;
+      }
+
       toast.error("Connection failed", {
-        description: `Failed to connect your account${errorType ? `: ${errorType}` : ""}. Please try again.`,
+        description: errorMessage,
       });
       window.history.replaceState({}, "", "/settings#connections");
     }

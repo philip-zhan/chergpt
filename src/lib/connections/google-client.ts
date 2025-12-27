@@ -104,3 +104,28 @@ export async function revokeToken(token: string): Promise<void> {
 export function getProviderScopes(provider: Provider): string[] {
   return [...DEFAULT_SCOPES, ...PROVIDER_SCOPES[provider]];
 }
+
+/**
+ * Verify that all requested scopes were granted
+ * @param requestedScopes - Array of scope strings that were requested
+ * @param grantedScope - Space-separated string of granted scopes from the token response
+ * @returns true if all requested scopes are present in granted scopes
+ */
+export function verifyScopes(
+  requestedScopes: string[],
+  grantedScope: string
+): { valid: boolean; missing: string[] } {
+  const grantedScopes = grantedScope.split(" ").filter(Boolean);
+  const missing: string[] = [];
+
+  for (const requested of requestedScopes) {
+    if (!grantedScopes.includes(requested)) {
+      missing.push(requested);
+    }
+  }
+
+  return {
+    valid: missing.length === 0,
+    missing,
+  };
+}

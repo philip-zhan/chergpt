@@ -2,7 +2,11 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
-import { buildAuthUrl, type Provider } from "@/lib/connections/google-client";
+import {
+  buildAuthUrl,
+  getProviderScopes,
+  type Provider,
+} from "@/lib/connections/google-client";
 
 const VALID_PROVIDERS: Provider[] = [
   "gmail",
@@ -48,6 +52,16 @@ export async function POST(request: Request) {
 
     // Store provider in cookie as well
     cookieStore.set("oauth_provider", provider, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 600,
+      path: "/",
+    });
+
+    // Store requested scopes for verification in callback
+    const requestedScopes = getProviderScopes(provider as Provider);
+    cookieStore.set("oauth_scopes", JSON.stringify(requestedScopes), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

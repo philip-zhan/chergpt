@@ -6,6 +6,7 @@ import {
   exchangeCodeForTokens,
   getUserInfo,
   type Provider,
+  verifyScopes,
 } from "@/lib/connections/google-client";
 import { encryptToken } from "@/lib/connections/token-manager";
 
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const savedState = cookieStore.get("oauth_state")?.value;
     const provider = cookieStore.get("oauth_provider")?.value as Provider;
+    const requestedScopesJson = cookieStore.get("oauth_scopes")?.value;
 
     if (!savedState || savedState !== state) {
       return NextResponse.redirect(
@@ -61,9 +63,31 @@ export async function GET(request: NextRequest) {
     // Clear state cookies
     cookieStore.delete("oauth_state");
     cookieStore.delete("oauth_provider");
+    cookieStore.delete("oauth_scopes");
 
     // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code);
+
+    // Verify that all requested scopes were granted
+    try {
+      const requestedScopes = JSON.parse(
+        requestedScopesJson || "[]"
+      ) as string[];
+      const scopeVerification = verifyScopes(requestedScopes, tokens.scope);
+
+      if (!scopeVerification.valid) {
+        console.error(
+          "Scope mismatch. Missing scopes:",
+          scopeVerification.missing
+        );
+        return NextResponse.redirect(
+          `${settingsUrl}?error=insufficient_permissions#connections`
+        );
+      }
+    } catch (error) {
+      console.error("Error verifying scopes:", error);
+      // Continue anyway if scope verification fails to parse
+    }
 
     // Get user info from Google
     const googleUser = await getUserInfo(tokens.accessToken);
