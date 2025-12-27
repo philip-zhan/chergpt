@@ -1,8 +1,9 @@
 "use client";
 
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,11 @@ interface Connection {
   comingSoon: boolean;
   email?: string;
   loading?: boolean;
+}
+
+interface ConnectionStatusResponse {
+  connected: boolean;
+  email?: string;
 }
 
 const connections: Connection[] = [
@@ -84,39 +90,117 @@ const connections: Connection[] = [
   },
 ];
 
+// Fetch connection status for a provider
+async function fetchConnectionStatus(
+  provider: string
+): Promise<ConnectionStatusResponse> {
+  const response = await fetch(`/api/connections/${provider}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${provider} status`);
+  }
+  return response.json();
+}
+
+// Initiate OAuth connection
+async function initiateConnection(
+  provider: string
+): Promise<{ authUrl: string }> {
+  const response = await fetch("/api/connections/initiate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to initiate OAuth");
+  }
+
+  return response.json();
+}
+
+// Disconnect a provider
+async function disconnectProvider(provider: string): Promise<void> {
+  const response = await fetch(`/api/connections/${provider}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to disconnect");
+  }
+}
+
 export function ConnectionsCard() {
-  const [connectionStates, setConnectionStates] = useState<
-    Record<string, { connected: boolean; email?: string; loading: boolean }>
-  >({});
+  const queryClient = useQueryClient();
 
-  // Fetch connection status on mount
+  // Get list of available providers (non-coming-soon)
+  const availableProviders = connections
+    .filter((c) => !c.comingSoon)
+    .map((c) => c.id);
+
+  // Fetch connection status for all providers using useQueries
+  const connectionQueries = useQueries({
+    queries: availableProviders.map((provider) => ({
+      queryKey: ["connection-status", provider],
+      queryFn: () => fetchConnectionStatus(provider),
+      retry: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    })),
+  });
+
+  // Create a map of provider to status
+  const connectionStates = availableProviders.reduce(
+    (acc, provider, index) => {
+      const query = connectionQueries[index];
+      acc[provider] = {
+        connected: query.data?.connected ?? false,
+        email: query.data?.email,
+        isLoading: query.isLoading,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      { connected: boolean; email?: string; isLoading: boolean }
+    >
+  );
+
+  // Mutation for initiating connection
+  const initiateMutation = useMutation({
+    mutationFn: initiateConnection,
+    onSuccess: (data) => {
+      // Redirect to OAuth URL
+      window.location.href = data.authUrl;
+    },
+    onError: (error) => {
+      console.error("Error initiating OAuth:", error);
+      toast.error("Connection failed", {
+        description: "Failed to start connection. Please try again.",
+      });
+    },
+  });
+
+  // Mutation for disconnecting
+  const disconnectMutation = useMutation({
+    mutationFn: disconnectProvider,
+    onSuccess: (_, provider) => {
+      // Invalidate and refetch the connection status
+      queryClient.invalidateQueries({
+        queryKey: ["connection-status", provider],
+      });
+      toast.success("Disconnected", {
+        description: "Your account has been disconnected.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error disconnecting:", error);
+      toast.error("Disconnection failed", {
+        description: "Failed to disconnect. Please try again.",
+      });
+    },
+  });
+
+  // Handle OAuth callback on mount
   useEffect(() => {
-    const fetchConnectionStatus = async () => {
-      const providers = connections.filter((c) => !c.comingSoon).map((c) => c.id);
-
-      for (const provider of providers) {
-        try {
-          const response = await fetch(`/api/connections/${provider}`);
-          if (response.ok) {
-            const data = await response.json();
-            setConnectionStates((prev) => ({
-              ...prev,
-              [provider]: {
-                connected: data.connected,
-                email: data.email,
-                loading: false,
-              },
-            }));
-          }
-        } catch (error) {
-          console.error(`Error fetching ${provider} status:`, error);
-        }
-      }
-    };
-
-    fetchConnectionStatus();
-
-    // Check for OAuth callback success/error in URL
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "connected") {
       toast.success("Connection successful", {
@@ -124,8 +208,8 @@ export function ConnectionsCard() {
       });
       // Clean up URL
       window.history.replaceState({}, "", "/settings#connections");
-      // Refresh connection status
-      fetchConnectionStatus();
+      // Refetch all connection statuses
+      queryClient.invalidateQueries({ queryKey: ["connection-status"] });
     } else if (params.get("error")) {
       const errorType = params.get("error");
       let errorMessage = "Failed to connect your account. Please try again.";
@@ -147,73 +231,14 @@ export function ConnectionsCard() {
       });
       window.history.replaceState({}, "", "/settings#connections");
     }
-  }, []);
+  }, [queryClient]);
 
-  const handleConnect = async (connectionId: string) => {
-    setConnectionStates((prev) => ({
-      ...prev,
-      [connectionId]: { ...prev[connectionId], loading: true },
-    }));
-
-    try {
-      const response = await fetch("/api/connections/initiate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider: connectionId }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to initiate OAuth");
-      }
-
-      const data = await response.json();
-      // Redirect to OAuth URL
-      window.location.href = data.authUrl;
-    } catch (error) {
-      console.error("Error initiating OAuth:", error);
-      toast.error("Connection failed", {
-        description: "Failed to start connection. Please try again.",
-      });
-      setConnectionStates((prev) => ({
-        ...prev,
-        [connectionId]: { ...prev[connectionId], loading: false },
-      }));
-    }
+  const handleConnect = (connectionId: string) => {
+    initiateMutation.mutate(connectionId);
   };
 
-  const handleDisconnect = async (connectionId: string) => {
-    setConnectionStates((prev) => ({
-      ...prev,
-      [connectionId]: { ...prev[connectionId], loading: true },
-    }));
-
-    try {
-      const response = await fetch(`/api/connections/${connectionId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to disconnect");
-      }
-
-      setConnectionStates((prev) => ({
-        ...prev,
-        [connectionId]: { connected: false, loading: false },
-      }));
-
-      toast.success("Disconnected", {
-        description: "Your account has been disconnected.",
-      });
-    } catch (error) {
-      console.error("Error disconnecting:", error);
-      toast.error("Disconnection failed", {
-        description: "Failed to disconnect. Please try again.",
-      });
-      setConnectionStates((prev) => ({
-        ...prev,
-        [connectionId]: { ...prev[connectionId], loading: false },
-      }));
-    }
+  const handleDisconnect = (connectionId: string) => {
+    disconnectMutation.mutate(connectionId);
   };
 
   return (
@@ -228,7 +253,12 @@ export function ConnectionsCard() {
         {connections.map((connection) => {
           const state = connectionStates[connection.id];
           const isConnected = state?.connected || false;
-          const isLoading = state?.loading || false;
+          const isLoading =
+            state?.isLoading ||
+            (initiateMutation.isPending &&
+              initiateMutation.variables === connection.id) ||
+            (disconnectMutation.isPending &&
+              disconnectMutation.variables === connection.id);
           const email = state?.email;
 
           return (
