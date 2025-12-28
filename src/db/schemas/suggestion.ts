@@ -16,16 +16,16 @@ export const suggestion = pgTable(
   "suggestion",
   {
     id: uuid("id").notNull().defaultRandom(),
-    documentId: uuid("documentId").notNull(),
-    documentCreatedAt: timestamp("documentCreatedAt").notNull(),
-    originalText: text("originalText").notNull(),
-    suggestedText: text("suggestedText").notNull(),
+    documentId: uuid("document_id").notNull(),
+    documentCreatedAt: timestamp("document_created_at").notNull(),
+    originalText: text("original_text").notNull(),
+    suggestedText: text("suggested_text").notNull(),
     description: text("description"),
-    isResolved: boolean("isResolved").notNull().default(false),
-    userId: integer("userId")
+    isResolved: boolean("is_resolved").notNull().default(false),
+    userId: integer("user_id")
       .notNull()
       .references(() => user.id),
-    createdAt: timestamp("createdAt").notNull(),
+    createdAt: timestamp("created_at").notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.id] }),

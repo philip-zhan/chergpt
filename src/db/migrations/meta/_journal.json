@@ -15,6 +15,20 @@
       "when": 1766731961050,
       "tag": "0001_productive_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766901301803,
+      "tag": "0002_majestic_toro",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766902281297,
+      "tag": "0003_first_scourge",
+      "breakpoints": true
     }
   ]
 }

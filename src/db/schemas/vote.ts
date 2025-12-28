@@ -6,13 +6,13 @@ import { message } from "./message";
 export const vote = pgTable(
   "vote",
   {
-    chatId: uuid("chatId")
+    chatId: uuid("chat_id")
       .notNull()
       .references(() => chat.id),
-    messageId: uuid("messageId")
+    messageId: uuid("message_id")
       .notNull()
       .references(() => message.id),
-    isUpvoted: boolean("isUpvoted").notNull(),
+    isUpvoted: boolean("is_upvoted").notNull(),
   },
   (table) => {
     return {
