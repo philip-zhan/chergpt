@@ -35,16 +35,9 @@ Scroll down to "Scopes" section and add the following **Bot Token Scopes**:
 - `channels:read` - View basic information about public channels
 - `channels:history` - View messages and other content in public channels
 
-### 4. Add User Token Scopes
+**Note:** We only request bot scopes for this integration. User scopes are not needed since we're building a bot-centric integration focused on reading channel data.
 
-In the same "Scopes" section, add the following **User Token Scopes**:
-
-- `identity.basic` - View basic information about the user
-- `identity.email` - View the user's email address
-
-**Important:** These user scopes are required to obtain the user's email address. During the OAuth flow, Slack will return both a bot token (for channel access) and a user token (for identity information). The user token is used to call the `users.identity` endpoint to fetch the user's email.
-
-### 5. Get Your Credentials
+### 4. Get Your Credentials
 
 1. Scroll back to the top of the "OAuth & Permissions" page
 2. Or go to "Basic Information" in the left sidebar
@@ -108,10 +101,9 @@ pnpm dev
 3. Review the permissions being requested:
    - View basic information about public channels
    - View messages in public channels
-   - View your identity information
 4. Click "Allow" to grant permissions
 5. You'll be redirected back to the settings page
-6. The Slack card should now show "Connected as [Team ID-User ID]"
+6. The Slack card should now show "Connected to Slack workspace"
 
 ### 4. Test Disconnection
 
@@ -132,10 +124,10 @@ pnpm db:studio
 Look at the `connection` table to see:
 - `provider`: Should be "slack"
 - `providerAccountId`: Format is `{teamId}-{userId}` (e.g., "T01234-U56789")
-- `accessToken`: Encrypted token
+- `accessToken`: Encrypted bot token
 - `refreshToken`: NULL (Slack doesn't use refresh tokens)
 - `accessTokenExpiresAt`: NULL (Slack tokens don't expire unless revoked)
-- `scope`: Comma-separated list of granted scopes
+- `scope`: Comma-separated list of granted scopes (e.g., "channels:read,channels:history")
 - `status`: Should be "active"
 
 ### API Endpoints
@@ -163,9 +155,8 @@ curl -X DELETE http://localhost:3000/api/connections/slack
 
 ### "Missing scopes" or "insufficient_permissions" error
 
-- Verify you've added all required scopes in your Slack App settings:
+- Verify you've added the required bot scopes in your Slack App settings:
   - Bot Token Scopes: `channels:read`, `channels:history`
-  - User Token Scopes: `identity.basic`, `identity.email`
 - Try disconnecting and reconnecting after adding scopes
 - You may need to reinstall the app to your workspace after scope changes
 
@@ -194,7 +185,7 @@ curl -X DELETE http://localhost:3000/api/connections/slack
 3. **Provider Account ID**: Uses format `{teamId}-{userId}` instead of just email
 4. **Scope Format**: Slack uses comma-separated scopes instead of space-separated
 5. **API Structure**: Slack OAuth v2 uses different endpoint structure than Google
-6. **Dual Tokens**: Slack OAuth returns both a bot token (for API access) and a user token (for identity). The bot token is stored in the database, while the user token is used during the OAuth flow to fetch user details like email via the `users.identity` endpoint.
+6. **Bot-Centric**: Only bot token is requested and stored. No user token needed for this integration.
 
 ## Security Considerations
 
@@ -239,7 +230,7 @@ if (connection && connection.status === "active") {
 }
 ```
 
-**Note:** The token stored in the database is the **bot token**, which has the `channels:read` and `channels:history` scopes. The user token (with `identity.basic` and `identity.email` scopes) is only used during the OAuth callback to fetch the user's email address and is not persisted.
+**Note:** The token stored in the database is the **bot token**, which has the `channels:read` and `channels:history` scopes. This is sufficient for reading channel information and messages.
 
 ## Next Steps
 

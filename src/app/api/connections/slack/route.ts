@@ -23,13 +23,13 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ connected: false });
     }
 
-    // Extract team info from providerAccountId (format: teamId-userId)
+    // Extract team ID from providerAccountId (format: teamId-userId)
     const [teamId] = connection.providerAccountId.split("-");
 
     return NextResponse.json({
       connected: true,
-      email: connection.providerAccountId, // Use the full team-user ID
-      team: teamId || undefined,
+      email: `Slack workspace (${teamId})`, // Simple display text
+      team: teamId,
     });
   } catch (error) {
     console.error("Error checking Slack connection:", error);

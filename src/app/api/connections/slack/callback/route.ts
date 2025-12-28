@@ -4,8 +4,6 @@ import { upsertConnection } from "@/db/queries/connection";
 import { getUser } from "@/lib/auth";
 import {
   exchangeCodeForTokens,
-  getAuthTest,
-  getUserIdentity,
   revokeToken,
   verifyScopes,
 } from "@/lib/connections/slack-client";
@@ -93,47 +91,11 @@ export async function GET(request: NextRequest) {
       // Continue anyway if scope verification fails to parse
     }
 
-    // Get user identity information
-    // Use the user-scoped token to fetch identity if available
-    let userInfo: {
-      userId: string;
-      email: string;
-      userName: string;
-      teamId: string;
-      teamName: string;
-    };
-
-    try {
-      if (tokens.userAccessToken) {
-        // Use user token to get identity (includes email)
-        userInfo = await getUserIdentity(tokens.userAccessToken);
-      } else {
-        // Fallback to auth.test with bot token if user token not available
-        const authTest = await getAuthTest(tokens.accessToken);
-        userInfo = {
-          userId: authTest.userId,
-          email: `${tokens.teamId}-${authTest.userId}@slack.workspace`, // Placeholder
-          userName: authTest.userName,
-          teamId: authTest.teamId,
-          teamName: authTest.teamName,
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching user identity:", error);
-      // Final fallback to token exchange data
-      userInfo = {
-        userId: tokens.userId,
-        email: `${tokens.teamId}-${tokens.userId}@slack.workspace`, // Placeholder
-        userName: tokens.userId,
-        teamId: tokens.teamId,
-        teamName: tokens.teamName,
-      };
-    }
-
     // Create provider account ID as teamId-userId
-    const providerAccountId = `${userInfo.teamId}-${userInfo.userId}`;
+    // Team and user info comes directly from the token exchange
+    const providerAccountId = `${tokens.teamId}-${tokens.userId}`;
 
-    // Encrypt bot token before storing (not the user token)
+    // Encrypt bot token before storing
     const encryptedAccessToken = encryptToken(tokens.accessToken);
 
     // Store connection in database
