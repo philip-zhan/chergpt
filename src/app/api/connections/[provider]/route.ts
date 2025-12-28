@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getConnection, revokeConnection } from "@/db/queries/connection";
 import { getUser } from "@/lib/auth";
-import { revokeToken } from "@/lib/connections/google-client";
+import { revokeToken as revokeGoogleToken } from "@/lib/connections/google-client";
+import { revokeToken as revokeSlackToken } from "@/lib/connections/slack-client";
 import { decryptToken } from "@/lib/connections/token-manager";
 
 type RouteContext = {
@@ -33,8 +34,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       connected: true,
-      email: connection.providerAccountId,
-      lastSynced: connection.lastSyncedAt,
+      accountId: connection.providerAccountId,
+      orgId: connection.providerOrgId,
     });
   } catch (error) {
     console.error("Error getting connection status:", error);
@@ -59,17 +60,25 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get connection to revoke token with Google
+    // Get connection to revoke token with provider
     const connection = await getConnection(Number(user.id), provider);
 
     if (connection?.accessToken) {
       try {
-        // Decrypt and revoke token with Google
+        // Decrypt and revoke token with provider
         const decryptedToken = decryptToken(connection.accessToken);
-        await revokeToken(decryptedToken);
+        if (
+          provider === "gmail" ||
+          provider === "google-calendar" ||
+          provider === "google-drive"
+        ) {
+          await revokeGoogleToken(decryptedToken);
+        } else if (provider === "slack") {
+          await revokeSlackToken(decryptedToken);
+        }
       } catch (error) {
         // Log but continue - we still want to remove from our database
-        console.error("Error revoking token with Google:", error);
+        console.error(`Error revoking token with ${provider}:`, error);
       }
     }
 

@@ -20,14 +20,13 @@ interface Connection {
   description: string;
   iconSrc: string;
   connected: boolean;
-  comingSoon: boolean;
-  email?: string;
-  loading?: boolean;
+  initiateEndpoint?: string;
 }
 
 interface ConnectionStatusResponse {
   connected: boolean;
-  email?: string;
+  accountId?: string;
+  orgId?: string;
 }
 
 const connections: Connection[] = [
@@ -37,7 +36,7 @@ const connections: Connection[] = [
     description: "Connect your Gmail account for email notifications",
     iconSrc: "/images/Gmail/Gmail.svg",
     connected: false,
-    comingSoon: false,
+    initiateEndpoint: "/api/connections/google/initiate",
   },
 
   {
@@ -46,7 +45,7 @@ const connections: Connection[] = [
     description: "Sync your calendar events and schedule meetings",
     iconSrc: "/images/google-calendar.svg",
     connected: false,
-    comingSoon: false,
+    initiateEndpoint: "/api/connections/google/initiate",
   },
   {
     id: "google-drive",
@@ -54,7 +53,7 @@ const connections: Connection[] = [
     description: "Access and manage your Google Drive files",
     iconSrc: "/images/google-drive.svg",
     connected: false,
-    comingSoon: false,
+    initiateEndpoint: "/api/connections/google/initiate",
   },
   {
     id: "slack",
@@ -62,7 +61,7 @@ const connections: Connection[] = [
     description: "Connect your Slack workspace for notifications and updates",
     iconSrc: "/images/slack.svg",
     connected: false,
-    comingSoon: false,
+    initiateEndpoint: "/api/connections/slack/initiate",
   },
   {
     id: "github",
@@ -70,7 +69,6 @@ const connections: Connection[] = [
     description: "Integrate with GitHub repositories and issues",
     iconSrc: "/images/github.svg",
     connected: false,
-    comingSoon: true,
   },
   {
     id: "notion",
@@ -78,7 +76,6 @@ const connections: Connection[] = [
     description: "Connect your Notion workspace for seamless collaboration",
     iconSrc: "/images/Notion/Notion_Symbol_0.svg",
     connected: false,
-    comingSoon: true,
   },
   {
     id: "linear",
@@ -86,7 +83,6 @@ const connections: Connection[] = [
     description: "Manage issues and track project progress",
     iconSrc: "/images/Linear/Linear_Symbol_0.svg",
     connected: false,
-    comingSoon: true,
   },
 ];
 
@@ -105,12 +101,10 @@ async function fetchConnectionStatus(
 async function initiateConnection(
   provider: string
 ): Promise<{ authUrl: string }> {
-  // Route to the appropriate initiate endpoint based on provider
-  const endpoint =
-    provider === "slack"
-      ? "/api/connections/slack/initiate"
-      : "/api/connections/initiate";
-
+  const endpoint = connections.find((c) => c.id === provider)?.initiateEndpoint;
+  if (!endpoint) {
+    throw new Error(`Initiate endpoint not found for ${provider}`);
+  }
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -140,7 +134,7 @@ export function ConnectionsCard() {
 
   // Get list of available providers (non-coming-soon)
   const availableProviders = connections
-    .filter((c) => !c.comingSoon)
+    .filter((c) => c.initiateEndpoint !== undefined)
     .map((c) => c.id);
 
   // Fetch connection status for all providers using useQueries
@@ -159,14 +153,20 @@ export function ConnectionsCard() {
       const query = connectionQueries[index];
       acc[provider] = {
         connected: query.data?.connected ?? false,
-        email: query.data?.email,
+        accountId: query.data?.accountId,
+        orgId: query.data?.orgId,
         isLoading: query.isLoading,
       };
       return acc;
     },
     {} as Record<
       string,
-      { connected: boolean; email?: string; isLoading: boolean }
+      {
+        connected: boolean;
+        accountId?: string;
+        orgId?: string;
+        isLoading: boolean;
+      }
     >
   );
 
@@ -265,7 +265,8 @@ export function ConnectionsCard() {
               initiateMutation.variables === connection.id) ||
             (disconnectMutation.isPending &&
               disconnectMutation.variables === connection.id);
-          const email = state?.email;
+          const accountId = state?.accountId;
+          const isComingSoon = connection.initiateEndpoint === undefined;
 
           return (
             <div
@@ -289,8 +290,8 @@ export function ConnectionsCard() {
                     </h4>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {isConnected && email
-                      ? `Connected as ${email}`
+                    {isConnected && accountId
+                      ? `Connected as ${accountId}`
                       : connection.description}
                   </p>
                 </div>
@@ -310,14 +311,14 @@ export function ConnectionsCard() {
                   </Button>
                 ) : (
                   <Button
-                    disabled={connection.comingSoon || isLoading}
+                    disabled={isComingSoon || isLoading}
                     onClick={() => handleConnect(connection.id)}
                     size="sm"
                   >
                     {isLoading && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    {connection.comingSoon ? "Coming soon" : "Connect"}
+                    {isComingSoon ? "Coming soon" : "Connect"}
                   </Button>
                 )}
               </div>
