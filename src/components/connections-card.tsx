@@ -105,7 +105,13 @@ async function fetchConnectionStatus(
 async function initiateConnection(
   provider: string
 ): Promise<{ authUrl: string }> {
-  const response = await fetch("/api/connections/initiate", {
+  // Route to the appropriate initiate endpoint based on provider
+  const endpoint =
+    provider === "slack"
+      ? "/api/connections/slack/initiate"
+      : "/api/connections/initiate";
+
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ provider }),
