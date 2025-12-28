@@ -9,7 +9,14 @@ import { vote } from "../schemas/vote";
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   try {
-    return await db.insert(message).values(messages);
+    return await db.insert(message).values(
+      messages.map((msg) => ({
+        ...msg,
+        inputTokenDetails: msg.inputTokenDetails ?? undefined,
+        outputTokenDetails: msg.outputTokenDetails ?? undefined,
+        totalTokens: msg.totalTokens ?? undefined,
+      }))
+    );
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to save messages");
   }

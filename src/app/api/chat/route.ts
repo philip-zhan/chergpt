@@ -3,6 +3,7 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   JsonToSseTransformStream,
+  type LanguageModelUsage,
   smoothStream,
   stepCountIs,
   streamText,
@@ -136,6 +137,9 @@ export async function POST(request: Request) {
             parts: message.parts,
             attachments: [],
             createdAt: new Date(),
+            inputTokenDetails: null,
+            outputTokenDetails: null,
+            totalTokens: null,
           },
         ],
       });
@@ -143,6 +147,9 @@ export async function POST(request: Request) {
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
+
+    // Store token usage data to access in the outer onFinish callback
+    let tokenUsageData: LanguageModelUsage;
 
     const stream = createUIMessageStream({
       // Pass original messages for tool approval continuation
@@ -196,6 +203,10 @@ export async function POST(request: Request) {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",
           },
+          onFinish: ({ usage }) => {
+            // Capture token usage data
+            tokenUsageData = usage;
+          },
         });
 
         result.consumeStream();
@@ -229,6 +240,18 @@ export async function POST(request: Request) {
                     createdAt: new Date(),
                     attachments: [],
                     chatId: id,
+                    inputTokenDetails:
+                      finishedMsg.role === "assistant"
+                        ? (tokenUsageData.inputTokenDetails ?? null)
+                        : null,
+                    outputTokenDetails:
+                      finishedMsg.role === "assistant"
+                        ? (tokenUsageData.outputTokenDetails ?? null)
+                        : null,
+                    totalTokens:
+                      finishedMsg.role === "assistant"
+                        ? (tokenUsageData.totalTokens ?? null)
+                        : null,
                   },
                 ],
               });
@@ -244,6 +267,18 @@ export async function POST(request: Request) {
               createdAt: new Date(),
               attachments: [],
               chatId: id,
+              inputTokenDetails:
+                currentMessage.role === "assistant"
+                  ? (tokenUsageData.inputTokenDetails ?? null)
+                  : null,
+              outputTokenDetails:
+                currentMessage.role === "assistant"
+                  ? (tokenUsageData.outputTokenDetails ?? null)
+                  : null,
+              totalTokens:
+                currentMessage.role === "assistant"
+                  ? (tokenUsageData.totalTokens ?? null)
+                  : null,
             })),
           });
         }
