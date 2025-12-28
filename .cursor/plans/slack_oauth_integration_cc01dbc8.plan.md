@@ -4,26 +4,26 @@ overview: Implement Slack OAuth connection with separate architecture from Googl
 todos:
   - id: env-setup
     content: Add Slack OAuth credentials to environment variables
-    status: pending
+    status: completed
   - id: slack-client
     content: Create slack-client.ts with OAuth utilities and API methods
-    status: pending
+    status: completed
   - id: initiate-route
     content: Create Slack initiate API route for starting OAuth flow
-    status: pending
+    status: completed
   - id: callback-route
     content: Create Slack callback API route for handling OAuth redirect
-    status: pending
+    status: completed
     dependencies:
       - slack-client
   - id: status-route
     content: Create Slack status/disconnect API route
-    status: pending
+    status: completed
     dependencies:
       - slack-client
   - id: frontend-enable
     content: Enable Slack in connections-card component
-    status: pending
+    status: completed
     dependencies:
       - initiate-route
       - callback-route

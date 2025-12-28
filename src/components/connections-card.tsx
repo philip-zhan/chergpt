@@ -62,7 +62,7 @@ const connections: Connection[] = [
     description: "Connect your Slack workspace for notifications and updates",
     iconSrc: "/images/slack.svg",
     connected: false,
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     id: "github",
