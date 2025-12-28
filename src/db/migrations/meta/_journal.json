@@ -29,6 +29,13 @@
       "when": 1766902281297,
       "tag": "0003_first_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766949343588,
+      "tag": "0004_breezy_eternity",
+      "breakpoints": true
     }
   ]
 }

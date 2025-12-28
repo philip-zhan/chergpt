@@ -18,6 +18,7 @@ export const connection = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     provider: text("provider").notNull(), // 'gmail', 'google-calendar', 'google-drive'
     providerAccountId: text("provider_account_id").notNull(), // Google user email
+    providerOrgId: text("provider_org_id"), // Slack team ID
     accessToken: text("access_token").notNull(), // Encrypted
     refreshToken: text("refresh_token"), // Encrypted
     accessTokenExpiresAt: timestamp("access_token_expires_at"),

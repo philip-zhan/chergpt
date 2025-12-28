@@ -1,0 +1,1 @@
+ALTER TABLE "connection" ADD COLUMN "provider_org_id" text;
