@@ -4,6 +4,7 @@ import { upsertConnection } from "@/db/queries/connection";
 import { getUser } from "@/lib/auth";
 import {
   exchangeCodeForTokens,
+  getAuthTest,
   getUserIdentity,
   revokeToken,
   verifyScopes,
@@ -93,8 +94,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user identity information
-    // Note: For Slack OAuth v2, the token exchange already includes user and team info
-    // But we'll fetch identity to get email if possible
+    // Use the user-scoped token to fetch identity if available
     let userInfo: {
       userId: string;
       email: string;
@@ -104,12 +104,26 @@ export async function GET(request: NextRequest) {
     };
 
     try {
-      userInfo = await getUserIdentity(tokens.accessToken);
-    } catch {
-      // Fallback to token exchange data if identity fetch fails
+      if (tokens.userAccessToken) {
+        // Use user token to get identity (includes email)
+        userInfo = await getUserIdentity(tokens.userAccessToken);
+      } else {
+        // Fallback to auth.test with bot token if user token not available
+        const authTest = await getAuthTest(tokens.accessToken);
+        userInfo = {
+          userId: authTest.userId,
+          email: `${tokens.teamId}-${authTest.userId}@slack.workspace`, // Placeholder
+          userName: authTest.userName,
+          teamId: authTest.teamId,
+          teamName: authTest.teamName,
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching user identity:", error);
+      // Final fallback to token exchange data
       userInfo = {
         userId: tokens.userId,
-        email: `${tokens.userId}@slack.workspace`, // Placeholder
+        email: `${tokens.teamId}-${tokens.userId}@slack.workspace`, // Placeholder
         userName: tokens.userId,
         teamId: tokens.teamId,
         teamName: tokens.teamName,
@@ -119,7 +133,7 @@ export async function GET(request: NextRequest) {
     // Create provider account ID as teamId-userId
     const providerAccountId = `${userInfo.teamId}-${userInfo.userId}`;
 
-    // Encrypt token before storing
+    // Encrypt bot token before storing (not the user token)
     const encryptedAccessToken = encryptToken(tokens.accessToken);
 
     // Store connection in database

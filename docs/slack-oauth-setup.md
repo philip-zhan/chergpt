@@ -42,6 +42,8 @@ In the same "Scopes" section, add the following **User Token Scopes**:
 - `identity.basic` - View basic information about the user
 - `identity.email` - View the user's email address
 
+**Important:** These user scopes are required to obtain the user's email address. During the OAuth flow, Slack will return both a bot token (for channel access) and a user token (for identity information). The user token is used to call the `users.identity` endpoint to fetch the user's email.
+
 ### 5. Get Your Credentials
 
 1. Scroll back to the top of the "OAuth & Permissions" page
@@ -192,6 +194,7 @@ curl -X DELETE http://localhost:3000/api/connections/slack
 3. **Provider Account ID**: Uses format `{teamId}-{userId}` instead of just email
 4. **Scope Format**: Slack uses comma-separated scopes instead of space-separated
 5. **API Structure**: Slack OAuth v2 uses different endpoint structure than Google
+6. **Dual Tokens**: Slack OAuth returns both a bot token (for API access) and a user token (for identity). The bot token is stored in the database, while the user token is used during the OAuth flow to fetch user details like email via the `users.identity` endpoint.
 
 ## Security Considerations
 
@@ -221,12 +224,13 @@ import { decryptToken } from "@/lib/connections/token-manager";
 const connection = await getConnection(userId, "slack");
 
 if (connection && connection.status === "active") {
-  const accessToken = decryptToken(connection.accessToken);
+  // Decrypt the bot token (this is what's stored in the database)
+  const botToken = decryptToken(connection.accessToken);
   
-  // Use the token to call Slack API
+  // Use the bot token to call Slack API
   const response = await fetch("https://slack.com/api/conversations.list", {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${botToken}`,
     },
   });
   
@@ -234,6 +238,8 @@ if (connection && connection.status === "active") {
   // Process channel data...
 }
 ```
+
+**Note:** The token stored in the database is the **bot token**, which has the `channels:read` and `channels:history` scopes. The user token (with `identity.basic` and `identity.email` scopes) is only used during the OAuth callback to fetch the user's email address and is not persisted.
 
 ## Next Steps
 

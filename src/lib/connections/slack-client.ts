@@ -102,6 +102,7 @@ export function buildAuthUrl(state: string): string {
  */
 export async function exchangeCodeForTokens(code: string): Promise<{
   accessToken: string;
+  userAccessToken: string | null;
   scope: string;
   teamId: string;
   teamName: string;
@@ -137,7 +138,8 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   }
 
   return {
-    accessToken: data.access_token,
+    accessToken: data.access_token, // Bot token
+    userAccessToken: data.authed_user?.access_token || null, // User token for identity
     scope: data.scope,
     teamId: data.team.id,
     teamName: data.team.name,
@@ -146,44 +148,64 @@ export async function exchangeCodeForTokens(code: string): Promise<{
 }
 
 /**
- * Get user identity information using the access token
+ * Get user identity information using the user access token
+ * Note: This should be called with the user-scoped token from authed_user.access_token
  */
-export async function getUserIdentity(accessToken: string): Promise<{
+export async function getUserIdentity(userAccessToken: string): Promise<{
   userId: string;
   email: string;
   userName: string;
   teamId: string;
   teamName: string;
 }> {
-  // First try using identity endpoint with user token
+  // Use the user token to call users.identity endpoint
   const identityResponse = await fetch("https://slack.com/api/users.identity", {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${userAccessToken}`,
     },
   });
 
-  if (identityResponse.ok) {
-    const data: SlackUserIdentityResponse = await identityResponse.json();
-    if (data.ok && data.user.email) {
-      return {
-        userId: data.user.id,
-        email: data.user.email,
-        userName: data.user.name,
-        teamId: data.team.id,
-        teamName: data.team.name,
-      };
-    }
+  if (!identityResponse.ok) {
+    throw new Error("Failed to fetch user identity from Slack");
   }
 
-  // Fallback to auth.test which works with bot tokens
+  const data: SlackUserIdentityResponse = await identityResponse.json();
+
+  if (!data.ok) {
+    throw new Error(`Slack API error: ${data.error || "Unknown error"}`);
+  }
+
+  if (!data.user.email) {
+    throw new Error("No email returned from Slack user identity");
+  }
+
+  return {
+    userId: data.user.id,
+    email: data.user.email,
+    userName: data.user.name,
+    teamId: data.team.id,
+    teamName: data.team.name,
+  };
+}
+
+/**
+ * Get basic team and user info using the bot token as fallback
+ * This is used when user token is not available or user identity fetch fails
+ */
+export async function getAuthTest(botToken: string): Promise<{
+  userId: string;
+  userName: string;
+  teamId: string;
+  teamName: string;
+}> {
   const authTestResponse = await fetch("https://slack.com/api/auth.test", {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${botToken}`,
     },
   });
 
   if (!authTestResponse.ok) {
-    throw new Error("Failed to fetch user info from Slack");
+    throw new Error("Failed to fetch auth test from Slack");
   }
 
   const authData: SlackAuthTestResponse = await authTestResponse.json();
@@ -192,10 +214,8 @@ export async function getUserIdentity(accessToken: string): Promise<{
     throw new Error(`Slack API error: ${authData.error || "Unknown error"}`);
   }
 
-  // For auth.test, we might not get email, so we'll use the user_id as fallback
   return {
     userId: authData.user_id,
-    email: `${authData.user_id}@slack.workspace`, // Placeholder email
     userName: authData.user,
     teamId: authData.team_id,
     teamName: authData.team,
