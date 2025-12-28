@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+
+# Database Rules
+
+* Use singular table names
+* Use snake_case for database table and column names
