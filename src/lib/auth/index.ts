@@ -7,7 +7,7 @@ import { db } from "@/db";
 import * as schema from "@/db/schemas/auth";
 
 export const auth = betterAuth({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,

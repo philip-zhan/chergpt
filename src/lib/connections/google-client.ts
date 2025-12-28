@@ -16,7 +16,7 @@ const DEFAULT_SCOPES: string[] = ["openid", "email", "profile"];
 export function getOAuthClient() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"}/api/connections/callback`;
+  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/connections/callback`;
 
   if (!clientId || !clientSecret) {
     throw new Error(

@@ -157,7 +157,7 @@ curl -X DELETE http://localhost:3000/api/connections/slack
 
 - Make sure you've added the correct redirect URI in your Slack App settings
 - Verify the redirect URI matches exactly (including protocol and port)
-- Check that your `NEXT_PUBLIC_BETTER_AUTH_URL` environment variable is set correctly
+- Check that your `NEXT_PUBLIC_APP_URL` environment variable is set correctly
 
 ### "Missing scopes" or "insufficient_permissions" error
 

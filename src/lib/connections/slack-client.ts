@@ -64,7 +64,7 @@ interface SlackAuthTestResponse {
 function getSlackConfig() {
   const clientId = process.env.SLACK_CLIENT_ID;
   const clientSecret = process.env.SLACK_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"}/api/connections/slack/callback`;
+  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "https://redirectmeto.com/http://localhost:3000"}/api/connections/slack/callback`;
 
   if (!clientId || !clientSecret) {
     throw new Error(

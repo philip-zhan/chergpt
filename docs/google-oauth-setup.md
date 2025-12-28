@@ -185,7 +185,7 @@ curl -X DELETE http://localhost:3000/api/connections/gmail
 
 ### "Error 400: redirect_uri_mismatch"
 
-- Check that your `NEXT_PUBLIC_BETTER_AUTH_URL` environment variable is set correctly
+- Check that your `NEXT_PUBLIC_APP_URL` environment variable is set correctly
 - Ensure the redirect URI in Google Cloud Console matches your app's URL
 
 ### "Invalid state parameter"
