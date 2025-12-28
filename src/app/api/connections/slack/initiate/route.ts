@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import { buildAuthUrl, getSlackScopes } from "@/lib/connections/slack-client";
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // Verify user is authenticated
     const user = await getUser();
