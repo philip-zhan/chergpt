@@ -53,7 +53,7 @@ Enable the following APIs in your project:
 2. Click "Create Credentials" > "OAuth client ID"
 3. Choose "Web application"
 4. Add authorized redirect URIs:
-   - For local development: `http://localhost:3000/api/connections/callback`
+   - For local development: `http://localhost:3000/api/connections/google/callback`
    - For production: `https://yourdomain.com/api/connections/callback`
 5. Click "Create"
 6. Copy the **Client ID** and **Client Secret**
@@ -185,7 +185,7 @@ curl -X DELETE http://localhost:3000/api/connections/gmail
 
 ### "Error 400: redirect_uri_mismatch"
 
-- Check that your `NEXT_PUBLIC_BETTER_AUTH_URL` environment variable is set correctly
+- Check that your `NEXT_PUBLIC_APP_URL` environment variable is set correctly
 - Ensure the redirect URI in Google Cloud Console matches your app's URL
 
 ### "Invalid state parameter"
