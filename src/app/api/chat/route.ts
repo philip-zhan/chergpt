@@ -12,7 +12,7 @@ import {
   createResumableStreamContext,
   type ResumableStreamContext,
 } from "resumable-stream";
-import { generateTitleFromUserMessage } from "@/app/(chat)/actions";
+import { generateTitleFromUserMessage } from "@/app/(authed)/actions";
 import {
   deleteChatById,
   getChatById,

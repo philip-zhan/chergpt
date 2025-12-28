@@ -1,6 +1,8 @@
 import Script from "next/script";
 import { DataStreamProvider } from "@/components/data-stream-provider";
+import { SidebarWrapper } from "@/components/providers/sidebar";
 import { SuspenseWrapper } from "@/components/suspense-wrapper";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -9,7 +11,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <SuspenseWrapper>{children}</SuspenseWrapper>
+        <SuspenseWrapper>
+          <SidebarWrapper>{children}</SidebarWrapper>
+        </SuspenseWrapper>
       </DataStreamProvider>
     </>
   );
