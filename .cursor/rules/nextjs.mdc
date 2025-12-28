@@ -3,7 +3,7 @@ alwaysApply: true
 ---
 
 # Next.js
-* Prefer Server Components for data fetching
+* Prefer Server Components for read operations (get, list) over api routes
 * Prefer api routes for write operations (create, update, delete) over server actions
 
 # React Query
