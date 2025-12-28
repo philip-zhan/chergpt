@@ -199,10 +199,6 @@ export function ConnectionsCardClient({
           const isConnected = status?.connected || false;
           const accountId = status?.accountId;
           const isComingSoon = connection.initiateEndpoint === undefined;
-          const isLoading =
-            connectingProvider === connection.id ||
-            disconnectingProvider === connection.id ||
-            isPending;
 
           return (
             <div
@@ -235,7 +231,7 @@ export function ConnectionsCardClient({
               <div>
                 {isConnected ? (
                   <Button
-                    disabled={isLoading}
+                    disabled={isPending}
                     onClick={() => handleDisconnect(connection.id)}
                     size="sm"
                     variant="outline"
@@ -247,7 +243,7 @@ export function ConnectionsCardClient({
                   </Button>
                 ) : (
                   <Button
-                    disabled={isComingSoon || isLoading}
+                    disabled={isComingSoon || isPending}
                     onClick={() => handleConnect(connection.id)}
                     size="sm"
                   >
