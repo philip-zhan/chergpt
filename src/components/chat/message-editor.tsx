@@ -12,8 +12,8 @@ import {
 import { deleteTrailingMessages } from "@/app/(authed)/actions";
 import type { ChatMessage } from "@/lib/types";
 import { getTextFromMessage } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
 
 export type MessageEditorProps = {
   message: ChatMessage;

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { Chat } from "@/components/chat";
+import { Chat } from "@/components/chat/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { SuspenseWrapper } from "@/components/suspense-wrapper";
 import { getChatById } from "@/db/queries/chat";
