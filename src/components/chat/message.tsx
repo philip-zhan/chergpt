@@ -5,24 +5,24 @@ import { memo, useState } from "react";
 import type { Vote } from "@/db/schemas/vote";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
-import { useDataStream } from "./data-stream-provider";
-import { DocumentToolResult } from "./document";
-import { DocumentPreview } from "./document-preview";
-import { MessageContent } from "./elements/message";
-import { Response } from "./elements/response";
+import { DocumentToolResult } from "../document";
+import { DocumentPreview } from "../document-preview";
+import { MessageContent } from "../elements/message";
+import { Response } from "../elements/response";
 import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from "./elements/tool";
-import { SparklesIcon } from "./icons";
+} from "../elements/tool";
+import { SparklesIcon } from "../icons";
+import { PreviewAttachment } from "../preview-attachment";
+import { useDataStream } from "../providers/data-stream-provider";
+import { Weather } from "../weather";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
-import { PreviewAttachment } from "./preview-attachment";
-import { Weather } from "./weather";
 
 const PurePreviewMessage = ({
   addToolApprovalResponse,

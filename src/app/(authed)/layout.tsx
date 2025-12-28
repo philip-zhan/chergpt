@@ -1,5 +1,5 @@
 import Script from "next/script";
-import { DataStreamProvider } from "@/components/data-stream-provider";
+import { DataStreamProvider } from "@/components/providers/data-stream-provider";
 import { SidebarWrapper } from "@/components/providers/sidebar";
 import { SuspenseWrapper } from "@/components/suspense-wrapper";
 

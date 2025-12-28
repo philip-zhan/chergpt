@@ -6,7 +6,7 @@ import {
   SecuritySettingsCards,
 } from "@daveyplate/better-auth-ui";
 import type { Metadata } from "next";
-import { ConnectionsCard } from "@/components/connections-card";
+import { ConnectionsCard } from "@/components/connections/connections-card-server";
 import {
   HashTabs,
   HashTabsContent,
