@@ -1,7 +1,0 @@
----
-alwaysApply: true
----
-
-# Prefer React Query (@tanstack/react-query) for all API requests
-
-React Query is already installed and configured in this project. Use it instead of SWR, raw fetch, or useEffect for data fetching.

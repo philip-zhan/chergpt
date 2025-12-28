@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+# Next.js
+* Prefer Server Components for data fetching
+* Prefer api routes for write operations (create, update, delete) over server actions
+
+# React Query
+* Prefer React Query (@tanstack/react-query) for all API requests
