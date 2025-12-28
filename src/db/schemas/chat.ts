@@ -11,9 +11,9 @@ import { user } from "./auth";
 
 export const chat = pgTable("chat", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
-  createdAt: timestamp("createdAt").notNull(),
+  createdAt: timestamp("created_at").notNull(),
   title: text("title").notNull(),
-  userId: integer("userId")
+  userId: integer("user_id")
     .notNull()
     .references(() => user.id),
   visibility: varchar("visibility", { enum: ["public", "private"] })

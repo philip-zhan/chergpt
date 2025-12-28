@@ -11,16 +11,16 @@ import { chat } from "./chat";
 
 export const message = pgTable("message", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
-  chatId: uuid("chatId")
+  chatId: uuid("chat_id")
     .notNull()
     .references(() => chat.id),
   role: varchar("role").notNull(),
   parts: json("parts").notNull(),
   attachments: json("attachments").notNull(),
-  createdAt: timestamp("createdAt").notNull(),
-  inputTokenDetails: json("inputTokenDetails"),
-  outputTokenDetails: json("outputTokenDetails"),
-  totalTokens: integer("totalTokens"),
+  createdAt: timestamp("created_at").notNull(),
+  inputTokenDetails: json("input_token_details"),
+  outputTokenDetails: json("output_token_details"),
+  totalTokens: integer("total_tokens"),
 });
 
 export type DBMessage = InferSelectModel<typeof message>;

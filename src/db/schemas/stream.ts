@@ -12,8 +12,8 @@ export const stream = pgTable(
   "stream",
   {
     id: uuid("id").notNull().defaultRandom(),
-    chatId: uuid("chatId").notNull(),
-    createdAt: timestamp("createdAt").notNull(),
+    chatId: uuid("chat_id").notNull(),
+    createdAt: timestamp("created_at").notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.id] }),
