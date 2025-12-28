@@ -1,9 +1,9 @@
 "use client";
 
-import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +13,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { ConnectionStatuses } from "@/db/queries/connection-status";
 
 interface Connection {
   id: string;
   name: string;
   description: string;
   iconSrc: string;
-  connected: boolean;
   initiateEndpoint?: string;
 }
 
-interface ConnectionStatusResponse {
-  connected: boolean;
-  accountId?: string;
-  orgId?: string;
+interface ConnectionsCardClientProps {
+  initialConnectionStatuses: ConnectionStatuses;
 }
 
 const connections: Connection[] = [
@@ -35,16 +33,13 @@ const connections: Connection[] = [
     name: "Gmail",
     description: "Connect your Gmail account for email notifications",
     iconSrc: "/images/Gmail/Gmail.svg",
-    connected: false,
     initiateEndpoint: "/api/connections/google/initiate",
   },
-
   {
     id: "google-calendar",
     name: "Google Calendar",
     description: "Sync your calendar events and schedule meetings",
     iconSrc: "/images/google-calendar.svg",
-    connected: false,
     initiateEndpoint: "/api/connections/google/initiate",
   },
   {
@@ -52,7 +47,6 @@ const connections: Connection[] = [
     name: "Google Drive",
     description: "Access and manage your Google Drive files",
     iconSrc: "/images/google-drive.svg",
-    connected: false,
     initiateEndpoint: "/api/connections/google/initiate",
   },
   {
@@ -60,7 +54,6 @@ const connections: Connection[] = [
     name: "Slack",
     description: "Connect your Slack workspace for notifications and updates",
     iconSrc: "/images/slack.svg",
-    connected: false,
     initiateEndpoint: "/api/connections/slack/initiate",
   },
   {
@@ -68,34 +61,20 @@ const connections: Connection[] = [
     name: "GitHub",
     description: "Integrate with GitHub repositories and issues",
     iconSrc: "/images/github.svg",
-    connected: false,
   },
   {
     id: "notion",
     name: "Notion",
     description: "Connect your Notion workspace for seamless collaboration",
     iconSrc: "/images/Notion/Notion_Symbol_0.svg",
-    connected: false,
   },
   {
     id: "linear",
     name: "Linear",
     description: "Manage issues and track project progress",
     iconSrc: "/images/Linear/Linear_Symbol_0.svg",
-    connected: false,
   },
 ];
-
-// Fetch connection status for a provider
-async function fetchConnectionStatus(
-  provider: string
-): Promise<ConnectionStatusResponse> {
-  const response = await fetch(`/api/connections/${provider}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${provider} status`);
-  }
-  return response.json();
-}
 
 // Initiate OAuth connection
 async function initiateConnection(
@@ -118,92 +97,17 @@ async function initiateConnection(
   return response.json();
 }
 
-// Disconnect a provider
-async function disconnectProvider(provider: string): Promise<void> {
-  const response = await fetch(`/api/connections/${provider}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to disconnect");
-  }
-}
-
-export function ConnectionsCard() {
-  const queryClient = useQueryClient();
-
-  // Get list of available providers (non-coming-soon)
-  const availableProviders = connections
-    .filter((c) => c.initiateEndpoint !== undefined)
-    .map((c) => c.id);
-
-  // Fetch connection status for all providers using useQueries
-  const connectionQueries = useQueries({
-    queries: availableProviders.map((provider) => ({
-      queryKey: ["connection-status", provider],
-      queryFn: () => fetchConnectionStatus(provider),
-      retry: 1,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    })),
-  });
-
-  // Create a map of provider to status
-  const connectionStates = availableProviders.reduce(
-    (acc, provider, index) => {
-      const query = connectionQueries[index];
-      acc[provider] = {
-        connected: query.data?.connected ?? false,
-        accountId: query.data?.accountId,
-        orgId: query.data?.orgId,
-        isLoading: query.isLoading,
-      };
-      return acc;
-    },
-    {} as Record<
-      string,
-      {
-        connected: boolean;
-        accountId?: string;
-        orgId?: string;
-        isLoading: boolean;
-      }
-    >
+export function ConnectionsCardClient({
+  initialConnectionStatuses,
+}: ConnectionsCardClientProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(
+    null
   );
-
-  // Mutation for initiating connection
-  const initiateMutation = useMutation({
-    mutationFn: initiateConnection,
-    onSuccess: (data) => {
-      // Redirect to OAuth URL
-      window.location.href = data.authUrl;
-    },
-    onError: (error) => {
-      console.error("Error initiating OAuth:", error);
-      toast.error("Connection failed", {
-        description: "Failed to start connection. Please try again.",
-      });
-    },
-  });
-
-  // Mutation for disconnecting
-  const disconnectMutation = useMutation({
-    mutationFn: disconnectProvider,
-    onSuccess: (_, provider) => {
-      // Invalidate and refetch the connection status
-      queryClient.invalidateQueries({
-        queryKey: ["connection-status", provider],
-      });
-      toast.success("Disconnected", {
-        description: "Your account has been disconnected.",
-      });
-    },
-    onError: (error) => {
-      console.error("Error disconnecting:", error);
-      toast.error("Disconnection failed", {
-        description: "Failed to disconnect. Please try again.",
-      });
-    },
-  });
+  const [disconnectingProvider, setDisconnectingProvider] = useState<
+    string | null
+  >(null);
 
   // Handle OAuth callback on mount
   useEffect(() => {
@@ -212,10 +116,9 @@ export function ConnectionsCard() {
       toast.success("Connection successful", {
         description: "Your account has been connected.",
       });
-      // Clean up URL
+      // Clean up URL and refresh server component
       window.history.replaceState({}, "", "/settings#connections");
-      // Refetch all connection statuses
-      queryClient.invalidateQueries({ queryKey: ["connection-status"] });
+      router.refresh();
     } else if (params.get("error")) {
       const errorType = params.get("error");
       let errorMessage = "Failed to connect your account. Please try again.";
@@ -237,14 +140,49 @@ export function ConnectionsCard() {
       });
       window.history.replaceState({}, "", "/settings#connections");
     }
-  }, [queryClient]);
+  }, [router]);
 
-  const handleConnect = (connectionId: string) => {
-    initiateMutation.mutate(connectionId);
+  const handleConnect = async (connectionId: string) => {
+    setConnectingProvider(connectionId);
+    try {
+      const data = await initiateConnection(connectionId);
+      // Redirect to OAuth URL
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error("Error initiating OAuth:", error);
+      toast.error("Connection failed", {
+        description: "Failed to start connection. Please try again.",
+      });
+      setConnectingProvider(null);
+    }
   };
 
-  const handleDisconnect = (connectionId: string) => {
-    disconnectMutation.mutate(connectionId);
+  const handleDisconnect = async (connectionId: string) => {
+    setDisconnectingProvider(connectionId);
+    try {
+      const response = await fetch(`/api/connections/${connectionId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to disconnect");
+      }
+
+      toast.success("Disconnected", {
+        description: "Your account has been disconnected.",
+      });
+      // Refresh the server component to update UI
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (error) {
+      console.error("Error disconnecting:", error);
+      toast.error("Disconnection failed", {
+        description: "Failed to disconnect. Please try again.",
+      });
+    } finally {
+      setDisconnectingProvider(null);
+    }
   };
 
   return (
@@ -257,16 +195,14 @@ export function ConnectionsCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {connections.map((connection) => {
-          const state = connectionStates[connection.id];
-          const isConnected = state?.connected || false;
-          const isLoading =
-            state?.isLoading ||
-            (initiateMutation.isPending &&
-              initiateMutation.variables === connection.id) ||
-            (disconnectMutation.isPending &&
-              disconnectMutation.variables === connection.id);
-          const accountId = state?.accountId;
+          const status = initialConnectionStatuses[connection.id];
+          const isConnected = status?.connected || false;
+          const accountId = status?.accountId;
           const isComingSoon = connection.initiateEndpoint === undefined;
+          const isLoading =
+            connectingProvider === connection.id ||
+            disconnectingProvider === connection.id ||
+            isPending;
 
           return (
             <div
@@ -304,7 +240,7 @@ export function ConnectionsCard() {
                     size="sm"
                     variant="outline"
                   >
-                    {isLoading && (
+                    {disconnectingProvider === connection.id && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     Disconnect
@@ -315,7 +251,7 @@ export function ConnectionsCard() {
                     onClick={() => handleConnect(connection.id)}
                     size="sm"
                   >
-                    {isLoading && (
+                    {connectingProvider === connection.id && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     {isComingSoon ? "Coming soon" : "Connect"}
