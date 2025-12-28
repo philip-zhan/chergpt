@@ -91,10 +91,6 @@ export async function GET(request: NextRequest) {
       // Continue anyway if scope verification fails to parse
     }
 
-    // Create provider account ID as teamId-userId
-    // Team and user info comes directly from the token exchange
-    const providerAccountId = `${tokens.teamId}-${tokens.userId}`;
-
     // Encrypt bot token before storing
     const encryptedAccessToken = encryptToken(tokens.accessToken);
 
@@ -103,7 +99,8 @@ export async function GET(request: NextRequest) {
     await upsertConnection({
       userId: Number(user.id),
       provider: "slack",
-      providerAccountId,
+      providerAccountId: tokens.userId,
+      providerOrgId: tokens.teamId,
       accessToken: encryptedAccessToken,
       refreshToken: null, // Slack doesn't use refresh tokens
       accessTokenExpiresAt: null, // Slack tokens don't expire

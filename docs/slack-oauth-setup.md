@@ -123,7 +123,8 @@ pnpm db:studio
 
 Look at the `connection` table to see:
 - `provider`: Should be "slack"
-- `providerAccountId`: Format is `{teamId}-{userId}` (e.g., "T01234-U56789")
+- `providerAccountId`: Slack user ID (e.g., "U67890")
+- `providerOrgId`: Slack team/workspace ID (e.g., "T01234")
 - `accessToken`: Encrypted bot token
 - `refreshToken`: NULL (Slack doesn't use refresh tokens)
 - `accessTokenExpiresAt`: NULL (Slack tokens don't expire unless revoked)
@@ -181,8 +182,8 @@ curl -X DELETE http://localhost:3000/api/connections/slack
 ## Key Differences from Google OAuth
 
 1. **No Refresh Tokens**: Slack access tokens don't expire by default (unless manually revoked)
-2. **Team Context**: Slack connections are tied to a specific workspace/team
-3. **Provider Account ID**: Uses format `{teamId}-{userId}` instead of just email
+2. **Team Context**: Slack connections are tied to a specific workspace/team, stored in `providerOrgId`
+3. **Provider Account ID**: Uses Slack user ID (e.g., "U67890") instead of email
 4. **Scope Format**: Slack uses comma-separated scopes instead of space-separated
 5. **API Structure**: Slack OAuth v2 uses different endpoint structure than Google
 6. **Bot-Centric**: Only bot token is requested and stored. No user token needed for this integration.

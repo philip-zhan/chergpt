@@ -23,12 +23,12 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ connected: false });
     }
 
-    // Extract team ID from providerAccountId (format: teamId-userId)
-    const [teamId] = connection.providerAccountId.split("-");
+    // Team ID is stored in providerOrgId
+    const teamId = connection.providerOrgId;
 
     return NextResponse.json({
       connected: true,
-      email: `Slack workspace (${teamId})`, // Simple display text
+      email: teamId ? `Slack workspace (${teamId})` : "Slack workspace",
       team: teamId,
     });
   } catch (error) {
