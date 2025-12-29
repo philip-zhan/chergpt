@@ -32,15 +32,32 @@ export async function fetchWithErrorHandlers(
   init?: RequestInit
 ) {
   try {
+    console.log("[FETCH] Making request to:", input);
     const response = await fetch(input, init);
+    
+    console.log("[FETCH] Response received:", {
+      ok: response.ok,
+      status: response.status,
+      contentType: response.headers.get("content-type"),
+      bodyUsed: response.bodyUsed,
+    });
 
     if (!response.ok) {
-      const { code, cause } = await response.json();
-      throw new ChatSDKError(code as ErrorCode, cause);
+      // Only try to parse JSON for non-streaming responses
+      const contentType = response.headers.get("content-type");
+      if (contentType?.includes("application/json")) {
+        const { code, cause } = await response.json();
+        throw new ChatSDKError(code as ErrorCode, cause);
+      }
+      
+      // For streaming or other content types, throw a generic error
+      throw new ChatSDKError("offline:chat");
     }
 
+    console.log("[FETCH] Returning response, bodyUsed:", response.bodyUsed);
     return response;
   } catch (error: unknown) {
+    console.error("[FETCH] Error:", error);
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       throw new ChatSDKError("offline:chat");
     }
