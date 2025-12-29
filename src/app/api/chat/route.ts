@@ -149,7 +149,25 @@ export async function POST(request: Request) {
     await createStreamId({ streamId, chatId: id });
 
     // Store token usage data to access in the outer onFinish callback
-    let tokenUsageData: LanguageModelUsage;
+    const tokenUsageData: LanguageModelUsage | undefined = undefined;
+
+    function buildTokenUsageData(
+      message: ChatMessage,
+      tokenUsageData?: LanguageModelUsage
+    ) {
+      if (message.role !== "assistant") {
+        return {
+          inputTokenDetails: null,
+          outputTokenDetails: null,
+          totalTokens: null,
+        };
+      }
+      return {
+        inputTokenDetails: tokenUsageData?.inputTokenDetails ?? null,
+        outputTokenDetails: tokenUsageData?.outputTokenDetails ?? null,
+        totalTokens: tokenUsageData?.totalTokens ?? null,
+      };
+    }
 
     const stream = createUIMessageStream({
       // Pass original messages for tool approval continuation
@@ -203,10 +221,10 @@ export async function POST(request: Request) {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",
           },
-          onFinish: ({ usage }) => {
-            // Capture token usage data
-            tokenUsageData = usage;
-          },
+          // onFinish: ({ usage }) => {
+          //   // Capture token usage data
+          //   tokenUsageData = usage;
+          // },
         });
 
         result.consumeStream();
@@ -240,18 +258,7 @@ export async function POST(request: Request) {
                     createdAt: new Date(),
                     attachments: [],
                     chatId: id,
-                    inputTokenDetails:
-                      finishedMsg.role === "assistant"
-                        ? (tokenUsageData.inputTokenDetails ?? null)
-                        : null,
-                    outputTokenDetails:
-                      finishedMsg.role === "assistant"
-                        ? (tokenUsageData.outputTokenDetails ?? null)
-                        : null,
-                    totalTokens:
-                      finishedMsg.role === "assistant"
-                        ? (tokenUsageData.totalTokens ?? null)
-                        : null,
+                    ...buildTokenUsageData(finishedMsg, tokenUsageData),
                   },
                 ],
               });
@@ -267,18 +274,7 @@ export async function POST(request: Request) {
               createdAt: new Date(),
               attachments: [],
               chatId: id,
-              inputTokenDetails:
-                currentMessage.role === "assistant"
-                  ? (tokenUsageData.inputTokenDetails ?? null)
-                  : null,
-              outputTokenDetails:
-                currentMessage.role === "assistant"
-                  ? (tokenUsageData.outputTokenDetails ?? null)
-                  : null,
-              totalTokens:
-                currentMessage.role === "assistant"
-                  ? (tokenUsageData.totalTokens ?? null)
-                  : null,
+              ...buildTokenUsageData(currentMessage, tokenUsageData),
             })),
           });
         }
