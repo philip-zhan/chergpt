@@ -67,10 +67,19 @@ export function getStreamContext() {
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
 
+  console.log("[CHAT API] POST request received");
+
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+    console.log("[CHAT API] Request parsed successfully:", {
+      chatId: requestBody.id,
+      hasMessage: !!requestBody.message,
+      messageCount: requestBody.messages?.length,
+      model: requestBody.selectedChatModel,
+    });
+  } catch (error) {
+    console.error("[CHAT API] Failed to parse request:", error);
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
@@ -78,14 +87,20 @@ export async function POST(request: Request) {
     const { id, message, messages, selectedChatModel, selectedVisibilityType } =
       requestBody;
 
+    console.log("[CHAT API] Starting chat stream for chat:", id);
+
     const session = await getSession();
 
     if (!session?.userId) {
+      console.error("[CHAT API] Unauthorized: No user session");
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
+    console.log("[CHAT API] User authenticated:", session.userId);
+
     // Check if this is a tool approval flow (all messages sent)
     const isToolApprovalFlow = Boolean(messages);
+    console.log("[CHAT API] Tool approval flow:", isToolApprovalFlow);
 
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
@@ -126,8 +141,8 @@ export async function POST(request: Request) {
       country,
     };
 
-    // Only save user messages to the database (not tool approval responses)
     if (message?.role === "user") {
+      // Only save user messages to the database (not tool approval responses)
       await saveMessages({
         messages: [
           {
@@ -147,6 +162,7 @@ export async function POST(request: Request) {
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
+    console.log("[CHAT API] Stream ID created:", streamId);
 
     // Store token usage data to access in the outer onFinish callback
     const tokenUsageData: LanguageModelUsage | undefined = undefined;
@@ -169,10 +185,13 @@ export async function POST(request: Request) {
       };
     }
 
+    console.log("[CHAT API] Creating UI message stream");
+
     const stream = createUIMessageStream({
       // Pass original messages for tool approval continuation
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
+        console.log("[CHAT API] Stream execute callback started");
         // Handle title generation in parallel
         if (titlePromise) {
           titlePromise.then((title) => {
@@ -184,6 +203,15 @@ export async function POST(request: Request) {
         const isReasoningModel =
           selectedChatModel.includes("reasoning") ||
           selectedChatModel.includes("thinking");
+
+        console.log(
+          "[CHAT API] Starting streamText with model:",
+          selectedChatModel,
+          {
+            isReasoningModel,
+            messageCount: uiMessages.length,
+          }
+        );
 
         const result = streamText({
           model: getLanguageModel(selectedChatModel),
@@ -227,6 +255,7 @@ export async function POST(request: Request) {
           // },
         });
 
+        console.log("[CHAT API] Consuming stream and merging to dataStream");
         result.consumeStream();
 
         dataStream.merge(
@@ -234,9 +263,14 @@ export async function POST(request: Request) {
             sendReasoning: true,
           })
         );
+        console.log("[CHAT API] Stream merged successfully");
       },
       generateId: generateUUID,
       onFinish: async ({ messages: finishedMessages }) => {
+        console.log("[CHAT API] Stream onFinish callback:", {
+          messageCount: finishedMessages.length,
+          isToolApprovalFlow,
+        });
         if (isToolApprovalFlow) {
           // For tool approval, update existing messages (tool state changed) and save new ones
           for (const finishedMsg of finishedMessages) {
@@ -279,28 +313,55 @@ export async function POST(request: Request) {
           });
         }
       },
-      onError: () => {
+      onError: (error) => {
+        console.error("[CHAT API] Stream error:", error);
         return "Oops, an error occurred!";
       },
     });
 
+    console.log("[CHAT API] UI message stream created");
+
     const streamContext = getStreamContext();
 
     if (streamContext) {
+      console.log("[CHAT API] Creating resumable stream");
       try {
+        const sseStream = stream.pipeThrough(new JsonToSseTransformStream());
+        console.log("[CHAT API] SSE transform applied");
+
         const resumableStream = await streamContext.resumableStream(
           streamId,
-          () => stream.pipeThrough(new JsonToSseTransformStream())
+          () => sseStream
         );
         if (resumableStream) {
-          return new Response(resumableStream);
+          console.log("[CHAT API] Returning resumable stream response");
+          return new Response(resumableStream, {
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              Connection: "keep-alive",
+            },
+          });
         }
+        console.log("[CHAT API] Resumable stream was null, falling back");
       } catch (error) {
-        console.error("Failed to create resumable stream:", error);
+        console.error("[CHAT API] Failed to create resumable stream:", error);
       }
+    } else {
+      console.log(
+        "[CHAT API] No stream context available, using regular stream"
+      );
     }
 
-    return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+    console.log("[CHAT API] Returning regular SSE stream response");
+    const sseStream = stream.pipeThrough(new JsonToSseTransformStream());
+    return new Response(sseStream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 

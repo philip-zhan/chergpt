@@ -108,7 +108,22 @@ export function Chat({
     },
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      fetch: fetchWithErrorHandlers,
+      fetch: async (...args) => {
+        console.log("[CHAT CLIENT] Sending request to /api/chat");
+        try {
+          const response = await fetchWithErrorHandlers(...args);
+          console.log("[CHAT CLIENT] Response received:", {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+          });
+          return response;
+        } catch (error) {
+          console.error("[CHAT CLIENT] Fetch error:", error);
+          throw error;
+        }
+      },
       prepareSendMessagesRequest(request) {
         const lastMessage = request.messages.at(-1);
 
@@ -126,6 +141,13 @@ export function Chat({
             })
           );
 
+        console.log("[CHAT CLIENT] Preparing request:", {
+          chatId: request.id,
+          isToolApprovalContinuation,
+          messageCount: request.messages.length,
+          model: currentModelIdRef.current,
+        });
+
         return {
           body: {
             id: request.id,
@@ -141,12 +163,15 @@ export function Chat({
       },
     }),
     onData: (dataPart) => {
+      console.log("[CHAT CLIENT] Data received:", dataPart.type);
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
     },
     onFinish: () => {
+      console.log("[CHAT CLIENT] Stream finished");
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
+      console.error("[CHAT CLIENT] Stream error:", error);
       if (error instanceof ChatSDKError) {
         // Check if it's a credit card error
         if (
