@@ -1,0 +1,89 @@
+import {
+  convertToModelMessages,
+  type LanguageModelUsage,
+  streamText,
+  type UIMessage,
+  validateUIMessages,
+} from "ai";
+import {
+  createChat,
+  getChatById,
+  loadChatMessages,
+  saveMessages,
+} from "@/db/queries/chatv2";
+import { getUserId } from "@/lib/auth";
+import { nanoid } from "@/lib/nanoid";
+
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
+
+const DEFAULT_MODEL_NAME = "openai/gpt-5.2-chat";
+
+export async function POST(req: Request) {
+  const { id: chatId, message }: { id: string; message: UIMessage } =
+    await req.json();
+
+  const userId = await getUserId();
+
+  // get or create chat
+  let chat = await getChatById({ publicId: chatId });
+  if (!chat) {
+    chat = await createChat({
+      publicId: chatId,
+      userId,
+      title: "New chat",
+      visibility: "private",
+    });
+  }
+
+  const previousMessages = await loadChatMessages({
+    chatPublicId: chat.publicId,
+  });
+  const messages = [...previousMessages, message];
+
+  const validatedMessages = await validateUIMessages({ messages });
+
+  let tokenUsageData: LanguageModelUsage;
+
+  const result = streamText({
+    model: DEFAULT_MODEL_NAME,
+    system: "You are a helpful assistant.",
+    messages: await convertToModelMessages(validatedMessages),
+    onFinish: ({ usage }) => {
+      tokenUsageData = usage;
+    },
+  });
+
+  result.consumeStream();
+
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+    sendSources: true,
+    originalMessages: validatedMessages,
+    generateMessageId: () => nanoid(),
+    onFinish: async ({ messages }) => {
+      const dbMessages = messages.map((message) => ({
+        publicId: message.id,
+        chatId: chat.id,
+        role: message.role,
+        parts: message.parts,
+        attachments: [],
+        createdAt: new Date(),
+        model_name: DEFAULT_MODEL_NAME,
+        inputTokenDetails:
+          message.role === "assistant"
+            ? (tokenUsageData?.inputTokenDetails ?? null)
+            : null,
+        outputTokenDetails:
+          message.role === "assistant"
+            ? (tokenUsageData?.outputTokenDetails ?? null)
+            : null,
+        totalTokens:
+          message.role === "assistant"
+            ? (tokenUsageData?.totalTokens ?? null)
+            : null,
+      }));
+      await saveMessages({ messages: dbMessages });
+    },
+  });
+}
