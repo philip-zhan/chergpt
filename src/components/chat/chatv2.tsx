@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Conversation,
@@ -22,16 +23,16 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { nanoid } from "@/lib/nanoid";
 
 interface ChatProps {
-  id?: string;
-  initialMessages?: UIMessage[];
+  id: string;
+  initialMessages: UIMessage[];
 }
 
-export function Chat({ initialMessages }: ChatProps) {
+export function Chat({ id, initialMessages }: ChatProps) {
+  const router = useRouter();
   const { messages, sendMessage, status } = useChat({
-    id: nanoid(),
+    id,
     messages: initialMessages,
     transport: new DefaultChatTransport({
       api: "/api/chatv2",
@@ -93,6 +94,7 @@ export function Chat({ initialMessages }: ChatProps) {
             if (text.trim()) {
               sendMessage({ text });
               setInput("");
+              router.replace(`/new/${id}`);
             }
           }}
         >

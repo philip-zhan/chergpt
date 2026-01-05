@@ -1,6 +1,19 @@
 import type { InferSelectModel } from "drizzle-orm";
-import { integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  integer,
+  json,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { chat } from "./chatv2";
+
+export const messageRoleEnum = pgEnum("message_role", [
+  "user",
+  "assistant",
+  "system",
+]);
 
 export const message = pgTable("messagev2", {
   id: integer("id").primaryKey().notNull().generatedAlwaysAsIdentity(),
@@ -8,7 +21,7 @@ export const message = pgTable("messagev2", {
   chatId: integer("chat_id")
     .notNull()
     .references(() => chat.id),
-  role: text("role").notNull(),
+  role: messageRoleEnum("role").notNull(),
   parts: json("parts").notNull(),
   attachments: json("attachments").notNull(),
   createdAt: timestamp("created_at").notNull(),

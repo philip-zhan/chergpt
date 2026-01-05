@@ -1,5 +1,6 @@
 "server-only";
 
+import { type UIMessage, validateUIMessages } from "ai";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { type Chat, chat as chatTable } from "../schemas/chatv2";
@@ -74,4 +75,24 @@ export async function updateChatTitle({
   title: string;
 }): Promise<void> {
   await db.update(chatTable).set({ title }).where(eq(chatTable.id, chatId));
+}
+
+export async function loadChatMessages({
+  chatPublicId,
+}: {
+  chatPublicId: string;
+}): Promise<UIMessage[]> {
+  const messages = await db
+    .select({
+      id: messageTable.publicId,
+      role: messageTable.role,
+      parts: messageTable.parts,
+      createdAt: messageTable.createdAt,
+    })
+    .from(messageTable)
+    .innerJoin(chatTable, eq(messageTable.chatId, chatTable.id))
+    .where(eq(chatTable.publicId, chatPublicId))
+    .orderBy(asc(messageTable.createdAt));
+  const validatedMessages = validateUIMessages({ messages });
+  return validatedMessages;
 }
