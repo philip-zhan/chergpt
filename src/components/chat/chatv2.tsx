@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, generateId, type UIMessage } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { useState } from "react";
 import {
   Conversation,
@@ -22,6 +22,7 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import { nanoid } from "@/lib/nanoid";
 
 interface ChatProps {
   id?: string;
@@ -30,8 +31,8 @@ interface ChatProps {
 
 export function Chat({ initialMessages }: ChatProps) {
   const { messages, sendMessage, status } = useChat({
+    id: nanoid(),
     messages: initialMessages,
-    generateId,
     transport: new DefaultChatTransport({
       api: "/api/chatv2",
     }),
