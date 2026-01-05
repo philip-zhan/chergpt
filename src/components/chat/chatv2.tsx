@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, generateId, type UIMessage } from "ai";
 import { useState } from "react";
 import {
   Conversation,
@@ -23,8 +23,15 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 
-export function Chat() {
+interface ChatProps {
+  id?: string;
+  initialMessages?: UIMessage[];
+}
+
+export function Chat({ initialMessages }: ChatProps) {
   const { messages, sendMessage, status } = useChat({
+    messages: initialMessages,
+    generateId,
     transport: new DefaultChatTransport({
       api: "/api/chatv2",
     }),

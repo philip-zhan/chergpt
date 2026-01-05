@@ -1,6 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { chat } from "./chat";
+import { chat } from "./chatv2";
 
 export const message = pgTable("messagev2", {
   id: integer("id").primaryKey().notNull().generatedAlwaysAsIdentity(),

@@ -1,0 +1,75 @@
+"server-only";
+
+import { asc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { type Chat, chat as chatTable } from "../schemas/chatv2";
+import { type DBMessage, message as messageTable } from "../schemas/messagev2";
+
+export async function getChatById({
+  publicId,
+}: {
+  publicId: string;
+}): Promise<Chat | null> {
+  const [selectedChat] = await db
+    .select()
+    .from(chatTable)
+    .where(eq(chatTable.publicId, publicId));
+  return selectedChat ?? null;
+}
+
+export async function saveChat({
+  publicId,
+  userId,
+  title,
+  visibility,
+}: {
+  publicId: string;
+  userId: number;
+  title: string;
+  visibility: "public" | "private";
+}): Promise<Chat> {
+  const [insertedChat] = await db
+    .insert(chatTable)
+    .values({
+      publicId,
+      userId,
+      title,
+      visibility,
+      createdAt: new Date(),
+    })
+    .returning();
+  return insertedChat;
+}
+
+export async function getMessagesByChatId({
+  chatId,
+}: {
+  chatId: number;
+}): Promise<DBMessage[]> {
+  return await db
+    .select()
+    .from(messageTable)
+    .where(eq(messageTable.chatId, chatId))
+    .orderBy(asc(messageTable.createdAt));
+}
+
+export async function saveMessages({
+  messages,
+}: {
+  messages: Omit<DBMessage, "id">[];
+}): Promise<void> {
+  if (messages.length === 0) {
+    return;
+  }
+  await db.insert(messageTable).values(messages);
+}
+
+export async function updateChatTitle({
+  chatId,
+  title,
+}: {
+  chatId: number;
+  title: string;
+}): Promise<void> {
+  await db.update(chatTable).set({ title }).where(eq(chatTable.id, chatId));
+}
