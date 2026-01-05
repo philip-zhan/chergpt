@@ -50,3 +50,8 @@ export async function getUser() {
   const session = await _getSession();
   return session.user;
 }
+
+export async function getUserId() {
+  const user = await getUser();
+  return Number(user.id);
+}

@@ -35,6 +35,15 @@ export function Chat({ initialMessages }: ChatProps) {
     messages: initialMessages,
     transport: new DefaultChatTransport({
       api: "/api/chatv2",
+      // only send the last message
+      prepareSendMessagesRequest(request) {
+        return {
+          body: {
+            id: request.id,
+            message: request.messages.at(-1),
+          },
+        };
+      },
     }),
   });
   const [input, setInput] = useState("");

@@ -17,7 +17,7 @@ export async function getChatById({
   return selectedChat ?? null;
 }
 
-export async function saveChat({
+export async function createChat({
   publicId,
   userId,
   title,
@@ -58,10 +58,12 @@ export async function saveMessages({
 }: {
   messages: Omit<DBMessage, "id">[];
 }): Promise<void> {
-  if (messages.length === 0) {
-    return;
-  }
-  await db.insert(messageTable).values(messages);
+  await db
+    .insert(messageTable)
+    .values(messages)
+    .onConflictDoNothing({
+      target: [messageTable.publicId],
+    });
 }
 
 export async function updateChatTitle({
