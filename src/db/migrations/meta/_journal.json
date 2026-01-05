@@ -43,13 +43,6 @@
       "when": 1767585906132,
       "tag": "0005_next_vampiro",
       "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1767587119544,
-      "tag": "0006_third_bill_hollister",
-      "breakpoints": true
     }
   ]
 }
