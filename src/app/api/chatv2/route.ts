@@ -1,5 +1,6 @@
 import {
   convertToModelMessages,
+  type LanguageModelUsage,
   streamText,
   type UIMessage,
   validateUIMessages,
@@ -38,10 +39,15 @@ export async function POST(req: Request) {
 
   const validatedMessages = await validateUIMessages({ messages });
 
+  let tokenUsageData: LanguageModelUsage;
+
   const result = streamText({
     model: "openai/gpt-5.2-chat",
     system: "You are a helpful assistant.",
     messages: await convertToModelMessages(validatedMessages),
+    onFinish: ({ usage }) => {
+      tokenUsageData = usage;
+    },
   });
 
   return result.toUIMessageStreamResponse({
@@ -57,9 +63,18 @@ export async function POST(req: Request) {
         parts: message.parts,
         attachments: [],
         createdAt: new Date(),
-        inputTokenDetails: null,
-        outputTokenDetails: null,
-        totalTokens: null,
+        inputTokenDetails:
+          message.role === "assistant"
+            ? (tokenUsageData?.inputTokenDetails ?? null)
+            : null,
+        outputTokenDetails:
+          message.role === "assistant"
+            ? (tokenUsageData?.outputTokenDetails ?? null)
+            : null,
+        totalTokens:
+          message.role === "assistant"
+            ? (tokenUsageData?.totalTokens ?? null)
+            : null,
       }));
       await saveMessages({ messages: dbMessages });
     },
