@@ -93,6 +93,8 @@ export async function loadChatMessages({
     .innerJoin(chatTable, eq(messageTable.chatId, chatTable.id))
     .where(eq(chatTable.publicId, chatPublicId))
     .orderBy(asc(messageTable.createdAt));
-  const validatedMessages = validateUIMessages({ messages });
-  return validatedMessages;
+  if (messages.length === 0) {
+    return [];
+  }
+  return validateUIMessages({ messages });
 }

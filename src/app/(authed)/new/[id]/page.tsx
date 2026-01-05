@@ -10,8 +10,8 @@ export default async function Page({
   const { id } = await params;
   const messages = await loadChatMessages({ chatPublicId: id });
 
-  if (!messages) {
-    redirect("/chat");
+  if (messages.length === 0) {
+    redirect("/new");
   }
 
   return <Chat id={id} initialMessages={messages} />;
