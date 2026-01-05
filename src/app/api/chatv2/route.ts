@@ -17,6 +17,8 @@ import { nanoid } from "@/lib/nanoid";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+const DEFAULT_MODEL_NAME = "openai/gpt-5.2-chat";
+
 export async function POST(req: Request) {
   const { id: chatId, message }: { id: string; message: UIMessage } =
     await req.json();
@@ -44,7 +46,7 @@ export async function POST(req: Request) {
   let tokenUsageData: LanguageModelUsage;
 
   const result = streamText({
-    model: "openai/gpt-5.2-chat",
+    model: DEFAULT_MODEL_NAME,
     system: "You are a helpful assistant.",
     messages: await convertToModelMessages(validatedMessages),
     onFinish: ({ usage }) => {
@@ -67,6 +69,7 @@ export async function POST(req: Request) {
         parts: message.parts,
         attachments: [],
         createdAt: new Date(),
+        model_name: DEFAULT_MODEL_NAME,
         inputTokenDetails:
           message.role === "assistant"
             ? (tokenUsageData?.inputTokenDetails ?? null)
