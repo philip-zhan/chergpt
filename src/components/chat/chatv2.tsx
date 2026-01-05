@@ -3,6 +3,25 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState } from "react";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Loader } from "@/components/ai-elements/loader";
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+} from "@/components/ai-elements/prompt-input";
 
 export function Chat() {
   const { messages, sendMessage, status } = useChat({
@@ -13,35 +32,68 @@ export function Chat() {
   const [input, setInput] = useState("");
 
   return (
-    <>
-      {messages.map((message) => (
-        <div key={message.id}>
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part, index) =>
-            part.type === "text" ? <span key={index}>{part.text}</span> : null
+    <div className="flex h-full flex-col">
+      <Conversation className="flex-1">
+        <ConversationContent>
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              description="Ask me anything and I'll help you out."
+              title="Start a conversation"
+            />
+          ) : (
+            messages.map((message) => (
+              <Message from={message.role} key={message.id}>
+                <MessageContent>
+                  {message.parts
+                    .filter((part) => part.type === "text")
+                    .map((part) =>
+                      message.role === "assistant" ? (
+                        <MessageResponse key={part.text}>
+                          {part.text}
+                        </MessageResponse>
+                      ) : (
+                        <span key={part.text}>{part.text}</span>
+                      )
+                    )}
+                </MessageContent>
+              </Message>
+            ))
           )}
-        </div>
-      ))}
+          {status === "streaming" && messages.at(-1)?.role !== "assistant" && (
+            <Message from="assistant">
+              <MessageContent>
+                <Loader size={16} />
+              </MessageContent>
+            </Message>
+          )}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput("");
-          }
-        }}
-      >
-        <input
-          disabled={status !== "ready"}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Say something..."
-          value={input}
-        />
-        <button disabled={status !== "ready"} type="submit">
-          Submit
-        </button>
-      </form>
-    </>
+      <div className="border-t p-4">
+        <PromptInput
+          onSubmit={({ text }) => {
+            if (text.trim()) {
+              sendMessage({ text });
+              setInput("");
+            }
+          }}
+        >
+          <PromptInputTextarea
+            disabled={status !== "ready"}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            value={input}
+          />
+          <PromptInputFooter>
+            <PromptInputTools />
+            <PromptInputSubmit
+              disabled={status !== "ready" || !input.trim()}
+              status={status}
+            />
+          </PromptInputFooter>
+        </PromptInput>
+      </div>
+    </div>
   );
 }
