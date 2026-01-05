@@ -28,7 +28,7 @@ export const message = pgTable("messagev2", {
   inputTokenDetails: json("input_token_details"),
   outputTokenDetails: json("output_token_details"),
   totalTokens: integer("total_tokens"),
-  model_name: text("model_name").notNull(),
+  model_name: text("model_name"),
 });
 
 export type DBMessage = InferSelectModel<typeof message>;
