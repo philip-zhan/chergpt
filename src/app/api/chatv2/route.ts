@@ -8,7 +8,7 @@ import {
 import {
   createChat,
   getChatById,
-  getMessagesByChatId,
+  loadChatMessages,
   saveMessages,
 } from "@/db/queries/chatv2";
 import { getUserId } from "@/lib/auth";
@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     });
   }
 
-  const previousMessages = await getMessagesByChatId({ chatId: chat.id });
+  const previousMessages = await loadChatMessages({
+    chatPublicId: chat.publicId,
+  });
   const messages = [...previousMessages, message];
 
   const validatedMessages = await validateUIMessages({ messages });

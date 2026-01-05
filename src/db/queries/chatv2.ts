@@ -42,18 +42,6 @@ export async function createChat({
   return insertedChat;
 }
 
-export async function getMessagesByChatId({
-  chatId,
-}: {
-  chatId: number;
-}): Promise<DBMessage[]> {
-  return await db
-    .select()
-    .from(messageTable)
-    .where(eq(messageTable.chatId, chatId))
-    .orderBy(asc(messageTable.createdAt));
-}
-
 export async function saveMessages({
   messages,
 }: {
