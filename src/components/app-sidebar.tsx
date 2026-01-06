@@ -110,7 +110,7 @@ export function AppSidebar({ user }: { user: Session | undefined }) {
                       className="h-8 p-1 md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
-                        router.push("/");
+                        router.push("/new");
                         router.refresh();
                       }}
                       type="button"
