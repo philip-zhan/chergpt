@@ -3,6 +3,7 @@
 import { type UIMessage, validateUIMessages } from "ai";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
+import { ChatSDKError } from "@/lib/errors";
 import { type Chat, chat as chatTable } from "../schemas/chatv2";
 import { type DBMessage, message as messageTable } from "../schemas/messagev2";
 
@@ -85,4 +86,24 @@ export async function loadChatMessages({
     return [];
   }
   return validateUIMessages({ messages });
+}
+
+export async function updateChatVisibilityById({
+  chatId,
+  visibility,
+}: {
+  chatId: string;
+  visibility: "private" | "public";
+}) {
+  try {
+    return await db
+      .update(chatTable)
+      .set({ visibility })
+      .where(eq(chatTable.publicId, chatId));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update chat visibility by id"
+    );
+  }
 }
