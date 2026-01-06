@@ -27,6 +27,7 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
+import { ChatHeader } from "@/components/chat/chat-header";
 
 interface ChatProps {
   id: string;
@@ -54,6 +55,11 @@ export function Chat({ id, initialMessages }: ChatProps) {
 
   return (
     <div className="flex h-full flex-col">
+      <ChatHeader
+        chatId={id}
+        isReadonly={false}
+        selectedVisibilityType="private"
+      />
       <Conversation className="flex-1">
         <ConversationContent>
           {messages.length === 0 ? (
