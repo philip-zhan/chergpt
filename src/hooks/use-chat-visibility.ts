@@ -42,7 +42,7 @@ export function useChatVisibility({
     setLocalVisibility(updatedVisibilityType);
     mutate(unstable_serialize(getChatHistoryPaginationKey));
 
-    fetch(`/api/chat?id=${chatId}`, {
+    fetch(`/api/chatv2?id=${chatId}`, {
       method: "PATCH",
       body: JSON.stringify({ visibility: updatedVisibilityType }),
     });

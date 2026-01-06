@@ -10,8 +10,10 @@ import {
   getChatById,
   loadChatMessages,
   saveMessages,
+  updateChatVisibilityById,
 } from "@/db/queries/chatv2";
-import { getUserId } from "@/lib/auth";
+import { getSession, getUserId } from "@/lib/auth";
+import { ChatSDKError } from "@/lib/errors";
 import { nanoid } from "@/lib/nanoid";
 
 // Allow streaming responses up to 30 seconds
@@ -86,4 +88,31 @@ export async function POST(req: Request) {
       await saveMessages({ messages: dbMessages });
     },
   });
+}
+
+export async function PATCH(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return new ChatSDKError("bad_request:api").toResponse();
+  }
+
+  const session = await getSession();
+
+  if (!session?.userId) {
+    return new ChatSDKError("unauthorized:chat").toResponse();
+  }
+
+  const chat = await getChatById({ publicId: id });
+
+  if (String(chat?.userId) !== session.userId) {
+    return new ChatSDKError("forbidden:chat").toResponse();
+  }
+
+  const { visibility } = await request.json();
+
+  await updateChatVisibilityById({ chatId: id, visibility });
+
+  return Response.json({ success: true }, { status: 200 });
 }
