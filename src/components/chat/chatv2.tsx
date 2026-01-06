@@ -2,7 +2,6 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Conversation,
@@ -23,6 +22,12 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai-elements/reasoning";
+import { ChatHeader } from "@/components/chat/chat-header";
 
 interface ChatProps {
   id: string;
@@ -30,7 +35,6 @@ interface ChatProps {
 }
 
 export function Chat({ id, initialMessages }: ChatProps) {
-  const router = useRouter();
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
@@ -51,6 +55,11 @@ export function Chat({ id, initialMessages }: ChatProps) {
 
   return (
     <div className="flex h-full flex-col">
+      <ChatHeader
+        chatId={id}
+        isReadonly={false}
+        selectedVisibilityType="private"
+      />
       <Conversation className="flex-1">
         <ConversationContent>
           {messages.length === 0 ? (
@@ -59,12 +68,34 @@ export function Chat({ id, initialMessages }: ChatProps) {
               title="Start a conversation"
             />
           ) : (
-            messages.map((message) => (
-              <Message from={message.role} key={message.id}>
-                <MessageContent>
-                  {message.parts
-                    .filter((part) => part.type === "text")
-                    .map((part) =>
+            messages.map((message, messageIndex) => {
+              const reasoningParts = message.parts.filter(
+                (part) => part.type === "reasoning"
+              );
+              const textParts = message.parts.filter(
+                (part) => part.type === "text"
+              );
+              const isLastMessage = messageIndex === messages.length - 1;
+              const isStreaming =
+                status === "streaming" &&
+                isLastMessage &&
+                message.role === "assistant";
+
+              return (
+                <Message from={message.role} key={message.id}>
+                  <MessageContent>
+                    {reasoningParts.length > 0 && (
+                      <Reasoning
+                        defaultOpen
+                        isStreaming={isStreaming && textParts.length === 0}
+                      >
+                        <ReasoningTrigger />
+                        <ReasoningContent>
+                          {reasoningParts.map((part) => part.text).join("")}
+                        </ReasoningContent>
+                      </Reasoning>
+                    )}
+                    {textParts.map((part) =>
                       message.role === "assistant" ? (
                         <MessageResponse key={part.text}>
                           {part.text}
@@ -73,9 +104,10 @@ export function Chat({ id, initialMessages }: ChatProps) {
                         <span key={part.text}>{part.text}</span>
                       )
                     )}
-                </MessageContent>
-              </Message>
-            ))
+                  </MessageContent>
+                </Message>
+              );
+            })
           )}
           {status === "streaming" && messages.at(-1)?.role !== "assistant" && (
             <Message from="assistant">
@@ -94,7 +126,8 @@ export function Chat({ id, initialMessages }: ChatProps) {
             if (text.trim()) {
               sendMessage({ text });
               setInput("");
-              router.replace(`/new/${id}`);
+              // Update URL without unmounting the component to preserve the streaming connection
+              window.history.replaceState(null, "", `/new/${id}`);
             }
           }}
         >
