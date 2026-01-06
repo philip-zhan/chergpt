@@ -5,7 +5,10 @@ import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/db/schemas/vote";
 import type { ChatMessage } from "@/lib/types";
-import { Action, Actions } from "../elements/actions";
+import {
+  MessageAction as Action,
+  MessageActions as Actions,
+} from "../ai-elements/message";
 import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "../icons";
 
 export function PureMessageActions({
