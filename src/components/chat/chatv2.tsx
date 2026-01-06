@@ -23,6 +23,11 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai-elements/reasoning";
 
 interface ChatProps {
   id: string;
@@ -59,12 +64,32 @@ export function Chat({ id, initialMessages }: ChatProps) {
               title="Start a conversation"
             />
           ) : (
-            messages.map((message) => (
-              <Message from={message.role} key={message.id}>
-                <MessageContent>
-                  {message.parts
-                    .filter((part) => part.type === "text")
-                    .map((part) =>
+            messages.map((message, messageIndex) => {
+              const reasoningParts = message.parts.filter(
+                (part) => part.type === "reasoning"
+              );
+              const textParts = message.parts.filter(
+                (part) => part.type === "text"
+              );
+              const isLastMessage = messageIndex === messages.length - 1;
+              const isStreaming =
+                status === "streaming" && isLastMessage && message.role === "assistant";
+
+              return (
+                <Message from={message.role} key={message.id}>
+                  <MessageContent>
+                    {reasoningParts.length > 0 && (
+                      <Reasoning
+                        defaultOpen
+                        isStreaming={isStreaming && textParts.length === 0}
+                      >
+                        <ReasoningTrigger />
+                        <ReasoningContent>
+                          {reasoningParts.map((part) => part.text).join("")}
+                        </ReasoningContent>
+                      </Reasoning>
+                    )}
+                    {textParts.map((part) =>
                       message.role === "assistant" ? (
                         <MessageResponse key={part.text}>
                           {part.text}
@@ -73,9 +98,10 @@ export function Chat({ id, initialMessages }: ChatProps) {
                         <span key={part.text}>{part.text}</span>
                       )
                     )}
-                </MessageContent>
-              </Message>
-            ))
+                  </MessageContent>
+                </Message>
+              );
+            })
           )}
           {status === "streaming" && messages.at(-1)?.role !== "assistant" && (
             <Message from="assistant">
