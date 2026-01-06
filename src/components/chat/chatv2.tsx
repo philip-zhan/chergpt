@@ -76,7 +76,7 @@ export function Chat({
         isReadonly={false}
         selectedVisibilityType="private"
       />
-      <Conversation className="min-h-0 flex-1 overflow-hidden">
+      <Conversation>
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
