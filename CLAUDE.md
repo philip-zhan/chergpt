@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Plan mode
+After creating a plan, export the plan to a file in the `.cursor/plans` directory.
+
 ## Commands
 
 ```bash
