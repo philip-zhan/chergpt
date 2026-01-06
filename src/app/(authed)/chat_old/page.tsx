@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { Chat } from "@/components/chat/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
-import { SuspenseWrapper } from "@/components/suspense-wrapper";
+import { SuspenseWrapper } from "@/components/root/suspense-wrapper";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 
