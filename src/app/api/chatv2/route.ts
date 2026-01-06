@@ -70,27 +70,27 @@ export async function POST(req: Request) {
     originalMessages: validatedMessages,
     generateMessageId: () => nanoid(),
     onFinish: async ({ messages }) => {
-      const dbMessages = messages.map((message) => ({
-        publicId: message.id,
-        chatId: chat.id,
-        role: message.role,
-        parts: message.parts,
-        attachments: [],
-        createdAt: new Date(),
-        model_name: selectedChatModel,
-        inputTokenDetails:
-          message.role === "assistant"
+      const dbMessages = messages.map((message) => {
+        const isAssistant = message.role === "assistant";
+        return {
+          publicId: message.id,
+          chatId: chat.id,
+          role: message.role,
+          parts: message.parts,
+          attachments: [],
+          createdAt: new Date(),
+          model_name: isAssistant ? selectedChatModel : null,
+          inputTokenDetails: isAssistant
             ? (tokenUsageData?.inputTokenDetails ?? null)
             : null,
-        outputTokenDetails:
-          message.role === "assistant"
+          outputTokenDetails: isAssistant
             ? (tokenUsageData?.outputTokenDetails ?? null)
             : null,
-        totalTokens:
-          message.role === "assistant"
+          totalTokens: isAssistant
             ? (tokenUsageData?.totalTokens ?? null)
             : null,
-      }));
+        };
+      });
       await saveMessages({ messages: dbMessages });
     },
   });
