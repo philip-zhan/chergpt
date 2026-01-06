@@ -1,11 +1,11 @@
 "server-only";
 
 import { type UIMessage, validateUIMessages } from "ai";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lt, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { ChatSDKError } from "@/lib/errors";
-import { type Chat, chat as chatTable } from "../schemas/chatv2";
-import { type DBMessage, message as messageTable } from "../schemas/messagev2";
+import { type Chat, chat } from "../schemas/chatv2";
+import { type DBMessage, message } from "../schemas/messagev2";
 
 export async function getChatById({
   publicId,
@@ -14,8 +14,8 @@ export async function getChatById({
 }): Promise<Chat | null> {
   const [selectedChat] = await db
     .select()
-    .from(chatTable)
-    .where(eq(chatTable.publicId, publicId));
+    .from(chat)
+    .where(eq(chat.publicId, publicId));
   return selectedChat ?? null;
 }
 
@@ -31,7 +31,7 @@ export async function createChat({
   visibility: "public" | "private";
 }): Promise<Chat> {
   const [insertedChat] = await db
-    .insert(chatTable)
+    .insert(chat)
     .values({
       publicId,
       userId,
@@ -49,10 +49,10 @@ export async function saveMessages({
   messages: Omit<DBMessage, "id">[];
 }): Promise<void> {
   await db
-    .insert(messageTable)
+    .insert(message)
     .values(messages)
     .onConflictDoNothing({
-      target: [messageTable.publicId],
+      target: [message.publicId],
     });
 }
 
@@ -63,7 +63,7 @@ export async function updateChatTitle({
   chatId: number;
   title: string;
 }): Promise<void> {
-  await db.update(chatTable).set({ title }).where(eq(chatTable.id, chatId));
+  await db.update(chat).set({ title }).where(eq(chat.id, chatId));
 }
 
 export async function loadChatMessages({
@@ -73,15 +73,15 @@ export async function loadChatMessages({
 }): Promise<UIMessage[]> {
   const messages = await db
     .select({
-      id: messageTable.publicId,
-      role: messageTable.role,
-      parts: messageTable.parts,
-      createdAt: messageTable.createdAt,
+      id: message.publicId,
+      role: message.role,
+      parts: message.parts,
+      createdAt: message.createdAt,
     })
-    .from(messageTable)
-    .innerJoin(chatTable, eq(messageTable.chatId, chatTable.id))
-    .where(eq(chatTable.publicId, chatPublicId))
-    .orderBy(asc(messageTable.createdAt));
+    .from(message)
+    .innerJoin(chat, eq(message.chatId, chat.id))
+    .where(eq(chat.publicId, chatPublicId))
+    .orderBy(asc(message.createdAt));
   if (messages.length === 0) {
     return [];
   }
@@ -97,13 +97,118 @@ export async function updateChatVisibilityById({
 }) {
   try {
     return await db
-      .update(chatTable)
+      .update(chat)
       .set({ visibility })
-      .where(eq(chatTable.publicId, chatId));
+      .where(eq(chat.publicId, chatId));
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to update chat visibility by id"
+    );
+  }
+}
+
+export async function deleteAllChatsByUserId({ userId }: { userId: number }) {
+  try {
+    const userChats = await db
+      .select({ id: chat.id })
+      .from(chat)
+      .where(eq(chat.userId, userId));
+
+    if (userChats.length === 0) {
+      return { deletedCount: 0 };
+    }
+
+    const chatIds = userChats.map((c) => c.id);
+
+    await db.delete(message).where(inArray(message.chatId, chatIds));
+
+    const deletedChats = await db
+      .delete(chat)
+      .where(eq(chat.userId, userId))
+      .returning();
+
+    return { deletedCount: deletedChats.length };
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to delete all chats by user id"
+    );
+  }
+}
+
+export async function getChatsByUserId({
+  userId,
+  limit,
+  startingAfter,
+  endingBefore,
+}: {
+  userId: number;
+  limit: number;
+  startingAfter: string | null;
+  endingBefore: string | null;
+}) {
+  try {
+    const extendedLimit = limit + 1;
+
+    const query = (whereCondition?: SQL<any>) =>
+      db
+        .select()
+        .from(chat)
+        .where(
+          whereCondition
+            ? and(whereCondition, eq(chat.userId, userId))
+            : eq(chat.userId, userId)
+        )
+        .orderBy(desc(chat.createdAt))
+        .limit(extendedLimit);
+
+    let filteredChats: Chat[] = [];
+
+    if (startingAfter) {
+      const [selectedChat] = await db
+        .select()
+        .from(chat)
+        .where(eq(chat.publicId, startingAfter))
+        .limit(1);
+
+      if (!selectedChat) {
+        throw new ChatSDKError(
+          "not_found:database",
+          `Chat with id ${startingAfter} not found`
+        );
+      }
+
+      filteredChats = await query(gt(chat.createdAt, selectedChat.createdAt));
+    } else if (endingBefore) {
+      const [selectedChat] = await db
+        .select()
+        .from(chat)
+        .where(eq(chat.publicId, endingBefore))
+        .limit(1);
+
+      if (!selectedChat) {
+        throw new ChatSDKError(
+          "not_found:database",
+          `Chat with id ${endingBefore} not found`
+        );
+      }
+
+      filteredChats = await query(lt(chat.createdAt, selectedChat.createdAt));
+    } else {
+      filteredChats = await query();
+    }
+
+    const hasMore = filteredChats.length > limit;
+
+    return {
+      chats: hasMore ? filteredChats.slice(0, limit) : filteredChats,
+      hasMore,
+    };
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get chats by user id"
     );
   }
 }
