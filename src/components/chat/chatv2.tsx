@@ -28,13 +28,22 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { ChatHeader } from "@/components/chat/chat-header";
+import { ModelSelectorCompact } from "@/components/multimodal-input";
+import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 
 interface ChatProps {
   id: string;
   initialMessages: UIMessage[];
+  initialChatModel?: string;
 }
 
-export function Chat({ id, initialMessages }: ChatProps) {
+export function Chat({
+  id,
+  initialMessages,
+  initialChatModel = DEFAULT_CHAT_MODEL,
+}: ChatProps) {
+  const [selectedChatModel, setSelectedChatModel] = useState(initialChatModel);
+
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
@@ -46,6 +55,7 @@ export function Chat({ id, initialMessages }: ChatProps) {
           body: {
             id: request.id,
             message: request.messages.at(-1),
+            selectedChatModel,
           },
         };
       },
@@ -138,7 +148,12 @@ export function Chat({ id, initialMessages }: ChatProps) {
             value={input}
           />
           <PromptInputFooter>
-            <PromptInputTools />
+            <PromptInputTools>
+              <ModelSelectorCompact
+                onModelChange={setSelectedChatModel}
+                selectedModelId={selectedChatModel}
+              />
+            </PromptInputTools>
             <PromptInputSubmit
               disabled={status !== "ready" || !input.trim()}
               status={status}

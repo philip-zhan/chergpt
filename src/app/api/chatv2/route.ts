@@ -12,6 +12,7 @@ import {
   saveMessages,
   updateChatVisibilityById,
 } from "@/db/queries/chatv2";
+import { getLanguageModel } from "@/lib/ai/providers";
 import { getSession, getUserId } from "@/lib/auth";
 import { ChatSDKError } from "@/lib/errors";
 import { nanoid } from "@/lib/nanoid";
@@ -19,11 +20,16 @@ import { nanoid } from "@/lib/nanoid";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-const DEFAULT_MODEL_NAME = "openai/gpt-5.2-chat";
-
 export async function POST(req: Request) {
-  const { id: chatId, message }: { id: string; message: UIMessage } =
-    await req.json();
+  const {
+    id: chatId,
+    message,
+    selectedChatModel,
+  }: {
+    id: string;
+    message: UIMessage;
+    selectedChatModel: string;
+  } = await req.json();
 
   const userId = await getUserId();
 
@@ -48,7 +54,7 @@ export async function POST(req: Request) {
   let tokenUsageData: LanguageModelUsage;
 
   const result = streamText({
-    model: DEFAULT_MODEL_NAME,
+    model: getLanguageModel(selectedChatModel),
     system: "You are a helpful assistant.",
     messages: await convertToModelMessages(validatedMessages),
     onFinish: ({ usage }) => {
@@ -71,7 +77,7 @@ export async function POST(req: Request) {
         parts: message.parts,
         attachments: [],
         createdAt: new Date(),
-        model_name: DEFAULT_MODEL_NAME,
+        model_name: selectedChatModel,
         inputTokenDetails:
           message.role === "assistant"
             ? (tokenUsageData?.inputTokenDetails ?? null)
