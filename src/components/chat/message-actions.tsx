@@ -93,7 +93,7 @@ export function PureMessageActions({
             loading: "Upvoting Response...",
             success: () => {
               queryClient.setQueryData<Vote[]>(
-                ["vote", chatId],
+                ["/api/vote", chatId],
                 (currentVotes: Vote[] | undefined) => {
                   if (!currentVotes) {
                     return [];
@@ -141,7 +141,7 @@ export function PureMessageActions({
             loading: "Downvoting Response...",
             success: () => {
               queryClient.setQueryData<Vote[]>(
-                ["vote", chatId],
+                ["/api/vote", chatId],
                 (currentVotes: Vote[] | undefined) => {
                   if (!currentVotes) {
                     return [];
