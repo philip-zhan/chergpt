@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/root/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getAllChatsByUserId } from "@/db/queries/chatv2";
 import { getUserId } from "@/lib/auth";

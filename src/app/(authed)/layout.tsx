@@ -1,6 +1,6 @@
 import Script from "next/script";
 import { DataStreamProvider } from "@/components/providers/data-stream-provider";
-import { SidebarWrapper } from "@/components/providers/sidebar";
+import { SidebarWrapper } from "@/components/root/sidebar-wrapper";
 import { SuspenseWrapper } from "@/components/suspense-wrapper";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
