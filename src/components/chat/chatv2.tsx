@@ -28,7 +28,7 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { ChatHeader } from "@/components/chat/chat-header";
-import { ModelSelectorCompact } from "@/components/multimodal-input";
+import { ModelSelectorCompact } from "@/components/chat/model-selector";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 
 interface ChatProps {
