@@ -1,7 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
 import equal from "fast-deep-equal";
 import { memo } from "react";
 import { toast } from "sonner";
-import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/db/schemas/vote";
 import type { ChatMessage } from "@/lib/types";
@@ -24,7 +24,7 @@ export function PureMessageActions({
   isLoading: boolean;
   setMode?: (mode: "view" | "edit") => void;
 }) {
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
   const [_, copyToClipboard] = useCopyToClipboard();
 
   if (isLoading) {
@@ -92,15 +92,15 @@ export function PureMessageActions({
           toast.promise(upvote, {
             loading: "Upvoting Response...",
             success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
+              queryClient.setQueryData<Vote[]>(
+                ["vote", chatId],
+                (currentVotes: Vote[] | undefined) => {
                   if (!currentVotes) {
                     return [];
                   }
 
                   const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
+                    (currentVote: Vote) => currentVote.messageId !== message.id
                   );
 
                   return [
@@ -111,8 +111,7 @@ export function PureMessageActions({
                       isUpvoted: true,
                     },
                   ];
-                },
-                { revalidate: false }
+                }
               );
 
               return "Upvoted Response!";
@@ -141,15 +140,15 @@ export function PureMessageActions({
           toast.promise(downvote, {
             loading: "Downvoting Response...",
             success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
+              queryClient.setQueryData<Vote[]>(
+                ["vote", chatId],
+                (currentVotes: Vote[] | undefined) => {
                   if (!currentVotes) {
                     return [];
                   }
 
                   const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
+                    (currentVote: Vote) => currentVote.messageId !== message.id
                   );
 
                   return [
@@ -160,8 +159,7 @@ export function PureMessageActions({
                       isUpvoted: false,
                     },
                   ];
-                },
-                { revalidate: false }
+                }
               );
 
               return "Downvoted Response!";
