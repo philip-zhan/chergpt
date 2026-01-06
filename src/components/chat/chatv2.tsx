@@ -70,13 +70,13 @@ export function Chat({
   const [input, setInput] = useState("");
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-dvh flex-col bg-background">
       <ChatHeader
         chatId={id}
         isReadonly={false}
         selectedVisibilityType="private"
       />
-      <Conversation className="flex-1">
+      <Conversation className="min-h-0 flex-1 overflow-hidden">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -136,7 +136,7 @@ export function Chat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="border-t p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <PromptInput
           onSubmit={({ text }) => {
             if (text.trim()) {
