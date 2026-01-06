@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
-import { deleteAllChatsByUserId, getChatsByUserId } from "@/db/queries/chat";
-import { getSession } from "@/lib/auth";
+import { deleteAllChatsByUserId, getChatsByUserId } from "@/db/queries/chatv2";
+import { getUserId } from "@/lib/auth";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
@@ -16,15 +16,9 @@ export async function GET(request: NextRequest) {
       "Only one of starting_after or ending_before can be provided."
     ).toResponse();
   }
-
-  const session = await getSession();
-
-  if (!session?.userId) {
-    return new ChatSDKError("unauthorized:chat").toResponse();
-  }
-
+  const userId = await getUserId();
   const chats = await getChatsByUserId({
-    id: session.userId,
+    userId,
     limit,
     startingAfter,
     endingBefore,
@@ -34,13 +28,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE() {
-  const session = await getSession();
-
-  if (!session?.userId) {
-    return new ChatSDKError("unauthorized:chat").toResponse();
-  }
-
-  const result = await deleteAllChatsByUserId({ userId: session.userId });
+  const userId = await getUserId();
+  const result = await deleteAllChatsByUserId({ userId });
 
   return Response.json(result, { status: 200 });
 }

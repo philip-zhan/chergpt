@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -28,13 +28,28 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { ChatHeader } from "@/components/chat/chat-header";
+import { ModelSelectorCompact } from "@/components/chat/model-selector";
+import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 
 interface ChatProps {
   id: string;
   initialMessages: UIMessage[];
+  initialChatModel?: string;
 }
 
-export function Chat({ id, initialMessages }: ChatProps) {
+export function Chat({
+  id,
+  initialMessages,
+  initialChatModel = DEFAULT_CHAT_MODEL,
+}: ChatProps) {
+  const [selectedChatModel, setSelectedChatModel] = useState(initialChatModel);
+  const selectedChatModelRef = useRef(selectedChatModel);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedChatModelRef.current = selectedChatModel;
+  }, [selectedChatModel]);
+
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
@@ -46,6 +61,7 @@ export function Chat({ id, initialMessages }: ChatProps) {
           body: {
             id: request.id,
             message: request.messages.at(-1),
+            selectedChatModel: selectedChatModelRef.current,
           },
         };
       },
@@ -54,13 +70,13 @@ export function Chat({ id, initialMessages }: ChatProps) {
   const [input, setInput] = useState("");
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-dvh flex-col bg-background">
       <ChatHeader
         chatId={id}
         isReadonly={false}
         selectedVisibilityType="private"
       />
-      <Conversation className="flex-1">
+      <Conversation>
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -120,14 +136,14 @@ export function Chat({ id, initialMessages }: ChatProps) {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="border-t p-4">
+      <div className="sticky bottom-0 border-t bg-background p-4">
         <PromptInput
           onSubmit={({ text }) => {
             if (text.trim()) {
               sendMessage({ text });
               setInput("");
               // Update URL without unmounting the component to preserve the streaming connection
-              window.history.replaceState(null, "", `/new/${id}`);
+              window.history.replaceState(null, "", `/chat/${id}`);
             }
           }}
         >
@@ -138,7 +154,12 @@ export function Chat({ id, initialMessages }: ChatProps) {
             value={input}
           />
           <PromptInputFooter>
-            <PromptInputTools />
+            <PromptInputTools>
+              <ModelSelectorCompact
+                onModelChange={setSelectedChatModel}
+                selectedModelId={selectedChatModel}
+              />
+            </PromptInputTools>
             <PromptInputSubmit
               disabled={status !== "ready" || !input.trim()}
               status={status}
