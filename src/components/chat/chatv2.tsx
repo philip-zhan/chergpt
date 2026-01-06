@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -43,6 +43,12 @@ export function Chat({
   initialChatModel = DEFAULT_CHAT_MODEL,
 }: ChatProps) {
   const [selectedChatModel, setSelectedChatModel] = useState(initialChatModel);
+  const selectedChatModelRef = useRef(selectedChatModel);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedChatModelRef.current = selectedChatModel;
+  }, [selectedChatModel]);
 
   const { messages, sendMessage, status } = useChat({
     id,
@@ -55,7 +61,7 @@ export function Chat({
           body: {
             id: request.id,
             message: request.messages.at(-1),
-            selectedChatModel,
+            selectedChatModel: selectedChatModelRef.current,
           },
         };
       },
