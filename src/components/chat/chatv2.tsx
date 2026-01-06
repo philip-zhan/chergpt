@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   Conversation,
@@ -42,6 +43,7 @@ export function Chat({
   initialMessages,
   initialChatModel = DEFAULT_CHAT_MODEL,
 }: ChatProps) {
+  const router = useRouter();
   const [selectedChatModel, setSelectedChatModel] = useState(initialChatModel);
   const selectedChatModelRef = useRef(selectedChatModel);
 
@@ -66,6 +68,9 @@ export function Chat({
         };
       },
     }),
+    onFinish: () => {
+      router.refresh();
+    },
   });
   const [input, setInput] = useState("");
 
