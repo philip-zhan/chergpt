@@ -10,9 +10,11 @@ import {
   getChatById,
   loadChatMessages,
   saveMessages,
+  updateChatTitle,
   updateChatVisibilityById,
 } from "@/db/queries/chatv2";
 import { getLanguageModel } from "@/lib/ai/providers";
+import { generateTitleFromUserMessage } from "@/lib/ai/title";
 import { getSession, getUserId } from "@/lib/auth";
 import { ChatSDKError } from "@/lib/errors";
 import { nanoid } from "@/lib/nanoid";
@@ -42,6 +44,8 @@ export async function POST(req: Request) {
       title: "New chat",
       visibility: "private",
     });
+    const title = await generateTitleFromUserMessage({ message });
+    await updateChatTitle({ chatId: chat.id, title });
   }
 
   const previousMessages = await loadChatMessages({
