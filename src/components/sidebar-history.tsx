@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -77,6 +78,16 @@ const groupChatsByDate = (
   );
 };
 
+async function deleteChat(chatId: string): Promise<void> {
+  const response = await fetch(`/api/chatv2?id=${chatId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete chat");
+  }
+}
+
 export function SidebarHistory({
   chats,
 }: {
@@ -95,27 +106,26 @@ export function SidebarHistory({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteChat,
+    onSuccess: () => {
+      const isCurrentChat = pathname === `/chat/${deleteId}`;
+      setShowDeleteDialog(false);
+      if (isCurrentChat) {
+        router.replace("/");
+      }
+      router.refresh();
+      toast.success("Chat deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete chat");
+    },
+  });
+
   const handleDelete = () => {
-    const chatToDelete = deleteId;
-    const isCurrentChat = pathname === `/chat/${chatToDelete}`;
-
-    setShowDeleteDialog(false);
-
-    const deletePromise = fetch(`/api/chatv2?id=${chatToDelete}`, {
-      method: "DELETE",
-    });
-
-    toast.promise(deletePromise, {
-      loading: "Deleting chat...",
-      success: () => {
-        if (isCurrentChat) {
-          router.replace("/");
-        }
-        router.refresh();
-        return "Chat deleted successfully";
-      },
-      error: "Failed to delete chat",
-    });
+    if (deleteId) {
+      deleteMutation.mutate(deleteId);
+    }
   };
 
   if (chats.length === 0) {
@@ -253,8 +263,11 @@ export function SidebarHistory({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Continue
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              onClick={handleDelete}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Continue"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
