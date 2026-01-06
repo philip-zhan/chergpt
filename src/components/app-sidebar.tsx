@@ -18,6 +18,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { Chat } from "@/db/schemas/chatv2";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +42,13 @@ async function deleteAllChats(): Promise<void> {
   }
 }
 
-export function AppSidebar({ user }: { user: Session | undefined }) {
+export function AppSidebar({
+  chats,
+  user,
+}: {
+  chats: Chat[];
+  user: Session | undefined;
+}) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
@@ -128,7 +135,7 @@ export function AppSidebar({ user }: { user: Session | undefined }) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarHistory user={user} />
+          <SidebarHistory chats={chats} user={user} />
         </SidebarContent>
         <SidebarFooter>
           <UserButton size="sm" />

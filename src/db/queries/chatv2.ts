@@ -137,6 +137,25 @@ export async function deleteAllChatsByUserId({ userId }: { userId: number }) {
   }
 }
 
+export async function getAllChatsByUserId({
+  userId,
+}: {
+  userId: number;
+}): Promise<Chat[]> {
+  try {
+    return await db
+      .select()
+      .from(chat)
+      .where(eq(chat.userId, userId))
+      .orderBy(desc(chat.createdAt));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get all chats by user id"
+    );
+  }
+}
+
 export async function getChatsByUserId({
   userId,
   limit,
@@ -153,13 +172,7 @@ export async function getChatsByUserId({
 
     const query = (whereCondition?: SQL<any>) =>
       db
-        .select({
-          id: chat.publicId,
-          createdAt: chat.createdAt,
-          title: chat.title,
-          userId: chat.userId,
-          visibility: chat.visibility,
-        })
+        .select()
         .from(chat)
         .where(
           whereCondition

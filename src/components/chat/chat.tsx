@@ -4,8 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
+import useSWR from "swr";
 import { ChatHeader } from "@/components/chat/chat-header";
 import {
   AlertDialog,
@@ -27,7 +26,6 @@ import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "../artifact";
 import { MultimodalInput } from "../multimodal-input";
 import { useDataStream } from "../providers/data-stream-provider";
-import { getChatHistoryPaginationKey } from "../sidebar-history";
 import { toast } from "../toast";
 import type { VisibilityType } from "../visibility-selector";
 import { Messages } from "./messages";
@@ -53,8 +51,6 @@ export function Chat({
     chatId: id,
     initialVisibilityType,
   });
-
-  const { mutate } = useSWRConfig();
 
   // Handle browser back/forward navigation
   useEffect(() => {
@@ -144,7 +140,7 @@ export function Chat({
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
     },
     onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
+      router.refresh();
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
