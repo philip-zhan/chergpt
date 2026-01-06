@@ -2,7 +2,6 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Conversation,
@@ -35,7 +34,6 @@ interface ChatProps {
 }
 
 export function Chat({ id, initialMessages }: ChatProps) {
-  const router = useRouter();
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
@@ -73,7 +71,9 @@ export function Chat({ id, initialMessages }: ChatProps) {
               );
               const isLastMessage = messageIndex === messages.length - 1;
               const isStreaming =
-                status === "streaming" && isLastMessage && message.role === "assistant";
+                status === "streaming" &&
+                isLastMessage &&
+                message.role === "assistant";
 
               return (
                 <Message from={message.role} key={message.id}>
@@ -120,7 +120,8 @@ export function Chat({ id, initialMessages }: ChatProps) {
             if (text.trim()) {
               sendMessage({ text });
               setInput("");
-              router.replace(`/new/${id}`);
+              // Update URL without unmounting the component to preserve the streaming connection
+              window.history.replaceState(null, "", `/new/${id}`);
             }
           }}
         >
