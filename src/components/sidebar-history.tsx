@@ -130,7 +130,7 @@ export function SidebarHistory({ user }: { user: Session | undefined }) {
 
     setShowDeleteDialog(false);
 
-    const deletePromise = fetch(`/api/chat?id=${chatToDelete}`, {
+    const deletePromise = fetch(`/api/chatv2?id=${chatToDelete}`, {
       method: "DELETE",
     });
 

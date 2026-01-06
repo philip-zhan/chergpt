@@ -143,7 +143,7 @@ export function Chat({
               sendMessage({ text });
               setInput("");
               // Update URL without unmounting the component to preserve the streaming connection
-              window.history.replaceState(null, "", `/new/${id}`);
+              window.history.replaceState(null, "", `/chat/${id}`);
             }
           }}
         >
