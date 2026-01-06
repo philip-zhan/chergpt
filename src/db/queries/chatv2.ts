@@ -137,6 +137,19 @@ export async function deleteAllChatsByUserId({ userId }: { userId: number }) {
   }
 }
 
+export async function getAllChatsByUserId({ userId }: { userId: number }) {
+  return await db
+    .select({
+      publicId: chat.publicId,
+      createdAt: chat.createdAt,
+      title: chat.title,
+      visibility: chat.visibility,
+    })
+    .from(chat)
+    .where(eq(chat.userId, userId))
+    .orderBy(desc(chat.createdAt));
+}
+
 export async function getChatsByUserId({
   userId,
   limit,
@@ -153,13 +166,7 @@ export async function getChatsByUserId({
 
     const query = (whereCondition?: SQL<any>) =>
       db
-        .select({
-          id: chat.publicId,
-          createdAt: chat.createdAt,
-          title: chat.title,
-          userId: chat.userId,
-          visibility: chat.visibility,
-        })
+        .select()
         .from(chat)
         .where(
           whereCondition

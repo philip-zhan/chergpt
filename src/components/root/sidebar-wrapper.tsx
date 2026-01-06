@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/root/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { getSession } from "@/lib/auth";
+import { getAllChatsByUserId } from "@/db/queries/chatv2";
+import { getUserId } from "@/lib/auth";
 
 export async function SidebarWrapper({
   children,
@@ -9,12 +10,14 @@ export async function SidebarWrapper({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const session = await getSession();
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
+
+  const userId = await getUserId();
+  const chats = await getAllChatsByUserId({ userId });
 
   return (
     <SidebarProvider defaultOpen={!isCollapsed}>
-      <AppSidebar user={session} />
+      <AppSidebar chats={chats} />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );

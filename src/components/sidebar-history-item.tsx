@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { memo } from "react";
-import type { Chat } from "@/db/schemas/chat";
+import type { SidebarChat } from "@/components/sidebar-history";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import {
   CheckCircleFillIcon,
@@ -32,20 +32,23 @@ const PureChatItem = ({
   onDelete,
   setOpenMobile,
 }: {
-  chat: Chat;
+  chat: SidebarChat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
   setOpenMobile: (open: boolean) => void;
 }) => {
   const { visibilityType, setVisibilityType } = useChatVisibility({
-    chatId: chat.id,
+    chatId: chat.publicId,
     initialVisibilityType: chat.visibility,
   });
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
+        <Link
+          href={`/chat/${chat.publicId}`}
+          onClick={() => setOpenMobile(false)}
+        >
           <span>{chat.title}</span>
         </Link>
       </SidebarMenuButton>
@@ -101,7 +104,7 @@ const PureChatItem = ({
 
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
-            onSelect={() => onDelete(chat.id)}
+            onSelect={() => onDelete(chat.publicId)}
           >
             <TrashIcon />
             <span>Delete</span>
