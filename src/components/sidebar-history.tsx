@@ -1,6 +1,5 @@
 "use client";
 
-import type { Session } from "better-auth";
 import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -65,13 +64,7 @@ const groupChatsByDate = (chats: Chat[]): GroupedChats => {
   );
 };
 
-export function SidebarHistory({
-  chats,
-  user,
-}: {
-  chats: Chat[];
-  user: Session | undefined;
-}) {
+export function SidebarHistory({ chats }: { chats: Chat[] }) {
   const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
   const id = pathname?.startsWith("/chat/") ? pathname.split("/")[2] : null;
@@ -102,18 +95,6 @@ export function SidebarHistory({
       error: "Failed to delete chat",
     });
   };
-
-  if (!user) {
-    return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-            Login to save and revisit previous chats!
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    );
-  }
 
   if (chats.length === 0) {
     return (

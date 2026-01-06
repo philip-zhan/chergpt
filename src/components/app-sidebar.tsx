@@ -2,7 +2,6 @@
 
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Session } from "better-auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -42,13 +41,7 @@ async function deleteAllChats(): Promise<void> {
   }
 }
 
-export function AppSidebar({
-  chats,
-  user,
-}: {
-  chats: Chat[];
-  user: Session | undefined;
-}) {
+export function AppSidebar({ chats }: { chats: Chat[] }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
@@ -93,24 +86,22 @@ export function AppSidebar({
                 </span>
               </Link>
               <div className="flex flex-row gap-1">
-                {user && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        className="h-8 p-1 md:h-fit md:p-2"
-                        disabled={deleteAllMutation.isPending}
-                        onClick={() => setShowDeleteAllDialog(true)}
-                        type="button"
-                        variant="ghost"
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent align="end" className="hidden md:block">
-                      Delete All Chats
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="h-8 p-1 md:h-fit md:p-2"
+                      disabled={deleteAllMutation.isPending}
+                      onClick={() => setShowDeleteAllDialog(true)}
+                      type="button"
+                      variant="ghost"
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent align="end" className="hidden md:block">
+                    Delete All Chats
+                  </TooltipContent>
+                </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -135,7 +126,7 @@ export function AppSidebar({
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarHistory chats={chats} user={user} />
+          <SidebarHistory chats={chats} />
         </SidebarContent>
         <SidebarFooter>
           <UserButton size="sm" />
