@@ -19,6 +19,7 @@ import {
   getChatById,
   saveChat,
   updateChatTitleById,
+  updateChatVisibilityById,
 } from "@/db/queries/chat";
 import {
   getMessagesByChatId,
@@ -350,4 +351,31 @@ export async function DELETE(request: Request) {
   const deletedChat = await deleteChatById({ id });
 
   return Response.json(deletedChat, { status: 200 });
+}
+
+export async function PATCH(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return new ChatSDKError("bad_request:api").toResponse();
+  }
+
+  const session = await getSession();
+
+  if (!session?.userId) {
+    return new ChatSDKError("unauthorized:chat").toResponse();
+  }
+
+  const chat = await getChatById({ id });
+
+  if (String(chat?.userId) !== session.userId) {
+    return new ChatSDKError("forbidden:chat").toResponse();
+  }
+
+  const { visibility } = await request.json();
+
+  await updateChatVisibilityById({ chatId: id, visibility });
+
+  return Response.json({ success: true }, { status: 200 });
 }
