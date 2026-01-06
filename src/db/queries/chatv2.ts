@@ -137,23 +137,17 @@ export async function deleteAllChatsByUserId({ userId }: { userId: number }) {
   }
 }
 
-export async function getAllChatsByUserId({
-  userId,
-}: {
-  userId: number;
-}): Promise<Chat[]> {
-  try {
-    return await db
-      .select()
-      .from(chat)
-      .where(eq(chat.userId, userId))
-      .orderBy(desc(chat.createdAt));
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get all chats by user id"
-    );
-  }
+export async function getAllChatsByUserId({ userId }: { userId: number }) {
+  return await db
+    .select({
+      publicId: chat.publicId,
+      createdAt: chat.createdAt,
+      title: chat.title,
+      visibility: chat.visibility,
+    })
+    .from(chat)
+    .where(eq(chat.userId, userId))
+    .orderBy(desc(chat.createdAt));
 }
 
 export async function getChatsByUserId({

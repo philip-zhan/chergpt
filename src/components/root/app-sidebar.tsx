@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PlusIcon, TrashIcon } from "@/components/icons";
-import { SidebarHistory } from "@/components/sidebar-history";
+import { type SidebarChat, SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -17,7 +17,6 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { Chat } from "@/db/schemas/chatv2";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +40,7 @@ async function deleteAllChats(): Promise<void> {
   }
 }
 
-export function AppSidebar({ chats }: { chats: Chat[] }) {
+export function AppSidebar({ chats }: { chats: SidebarChat[] }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
